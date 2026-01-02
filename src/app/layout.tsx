@@ -25,9 +25,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen justify-between`}
       >
-        {children}
+        <header className="text-center p-5 border">Family Tree App</header>
+       <div className="grow border text-center">
+         {children}
+       </div>
+        <footer className="text-center p-5 border mt-10">
+          &copy; {new Date().getFullYear()} Family Tree
+        </footer>
       </body>
     </html>
   );

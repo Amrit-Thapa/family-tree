@@ -4,7 +4,7 @@ import { TreeGraph } from "@/features/graph/TreeGraph";
 export default function TreePage() {
   return (
     <div>
-       <TreeGraph graph={mockFamilyTree} />
+      <TreeGraph graph={mockFamilyTree} />
     </div>
   );
 }

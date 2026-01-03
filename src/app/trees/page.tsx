@@ -1,7 +1,5 @@
-'use client';
-import React, { useState } from 'react';
-
-
+"use client";
+import React, { useState } from "react";
 
 interface TreeNode {
   id: string;
@@ -12,26 +10,24 @@ interface TreeNode {
 
 export default function TreesPage() {
   const [tree] = useState<TreeNode>({
-    id: '1',
-    name: 'Grandfather',
+    id: "1",
+    name: "Grandfather",
     generation: 0,
     children: [
       {
-        id: '2',
-        name: 'Father',
+        id: "2",
+        name: "Father",
         generation: 1,
         children: [
-          { id: '4', name: 'You', generation: 2, children: [] },
-          { id: '5', name: 'Sibling', generation: 2, children: [] },
+          { id: "4", name: "You", generation: 2, children: [] },
+          { id: "5", name: "Sibling", generation: 2, children: [] },
         ],
       },
       {
-        id: '3',
-        name: 'Uncle',
+        id: "3",
+        name: "Uncle",
         generation: 1,
-        children: [
-          { id: '6', name: 'Cousin', generation: 2, children: [] },
-        ],
+        children: [{ id: "6", name: "Cousin", generation: 2, children: [] }],
       },
     ],
   });

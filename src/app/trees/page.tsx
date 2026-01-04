@@ -1,6 +1,3 @@
-"use client";
-import React, { useState } from "react";
-
 interface TreeNode {
   id: string;
   name: string;
@@ -9,7 +6,7 @@ interface TreeNode {
 }
 
 export default function TreesPage() {
-  const [tree] = useState<TreeNode>({
+  const tree = {
     id: "1",
     name: "Grandfather",
     generation: 0,
@@ -30,7 +27,7 @@ export default function TreesPage() {
         children: [{ id: "6", name: "Cousin", generation: 2, children: [] }],
       },
     ],
-  });
+  };
 
   const renderNode = (node: TreeNode) => (
     <div key={node.id} className="flex flex-col items-center">

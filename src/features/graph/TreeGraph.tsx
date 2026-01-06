@@ -27,9 +27,28 @@ export function TreeGraph({ graph }: Props) {
     (r) => r.type === "parent"
   );
 
+  const handleArrowNavigation = (key: string) => {
+    if (!selectedId) return;
+
+    const index = people.findIndex((p) => p.id === selectedId);
+
+    if (key === "ArrowRight") {
+      setSelectedId(people[index + 1]?.id ?? selectedId);
+    }
+
+    if (key === "ArrowLeft") {
+      setSelectedId(people[index - 1]?.id ?? selectedId);
+    }
+  };
+
   return (
     <>
       <svg width={800} height={600} style={{ border: "1px solid #ccc" }}>
+        <defs>
+          <filter id="focus-ring">
+            <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#2563eb" />
+          </filter>
+        </defs>
         {/* 🔹 1. Render lines FIRST */}
         {parentRelationships.map((rel, index) => {
           const parentPos = positions[rel.from];
@@ -61,8 +80,20 @@ export function TreeGraph({ graph }: Props) {
           return (
             <g
               key={person.id}
+              tabIndex={0}
+              role="button"
+              aria-label={`Person ${person.firstName}`}
               onClick={() => setSelectedId(person.id)}
-              className="cursor-pointer"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setSelectedId(person.id);
+                }
+                if (e.key.startsWith("Arrow")) {
+                  handleArrowNavigation(e.key);
+                }
+              }}
+              style={{ cursor: "pointer", outline: "none" }}
             >
               <circle
                 cx={pos.x}
@@ -70,6 +101,7 @@ export function TreeGraph({ graph }: Props) {
                 r={isSelected ? 28 : 24}
                 fill={isSelected ? "#93c5fd" : "#e5e7eb"}
                 stroke="#111827"
+                filter={isSelected ? "url(#focus-ring)" : undefined}
               />
               <text x={pos.x} y={pos.y + 4} textAnchor="middle" fontSize="12">
                 {person.firstName}
@@ -78,13 +110,9 @@ export function TreeGraph({ graph }: Props) {
           );
         })}
       </svg>
-
-      {selectedId && (
-        <div>
-          <h2>Selected Person</h2>
-          <p>{graph.people[selectedId].firstName}</p>
-        </div>
-      )}
+      <div aria-live="polite" style={{ marginTop: 12 }}>
+        {selectedId && `Selected ${graph.people[selectedId].firstName}`}
+      </div>
     </>
   );
 }

@@ -114,6 +114,7 @@ export function TreeGraph({ graph, roleOverride }: Props) {
               style={{
                 cursor: writable ? "pointer" : "not-allowed",
                 opacity: writable ? 1 : 0.6,
+                outline: "none",
               }}
             >
               <circle

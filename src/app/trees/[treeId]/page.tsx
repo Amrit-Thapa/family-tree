@@ -8,13 +8,11 @@ type Props = {
   };
 };
 
-export default function TreePage({ searchParams }: Props) {
-  const effectiveRole: Role =
-    searchParams?.role === "viewer" ? "viewer" : "editor";
+export default async function TreePage({ searchParams }: Props) {
+  const resolvedSearchParams = await searchParams;
 
-  return (
-    <div>
-      <TreeGraph graph={mockFamilyTree} roleOverride={effectiveRole} />
-    </div>
-  );
+  const effectiveRole: Role =
+    resolvedSearchParams?.role === "viewer" ? "viewer" : "editor";
+
+  return <TreeGraph graph={mockFamilyTree} roleOverride={effectiveRole} />;
 }

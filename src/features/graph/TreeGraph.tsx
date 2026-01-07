@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { FamilyGraph, PersonId } from "@/shared/types/domain";
 
 type Props = {
@@ -9,19 +9,21 @@ type Props = {
 
 export function TreeGraph({ graph }: Props) {
   const people = Object.values(graph.people);
+
   const [selectedId, setSelectedId] = useState<PersonId | null>(null);
 
-  // 🔹 Single source of truth for layout
-  const positions = people.reduce<Record<PersonId, { x: number; y: number }>>(
-    (acc, person, index) => {
-      acc[person.id] = {
-        x: 150 + index * 150,
-        y: person.birthDate?.startsWith("19") ? 150 : 300,
-      };
-      return acc;
-    },
-    {} as Record<PersonId, { x: number; y: number }>
-  );
+  const positions = useMemo(() => {
+    return people.reduce<Record<PersonId, { x: number; y: number }>>(
+      (acc, person, index) => {
+        acc[person.id] = {
+          x: 150 + index * 150,
+          y: person.birthDate?.startsWith("19") ? 150 : 300,
+        };
+        return acc;
+      },
+      {} as Record<PersonId, { x: number; y: number }>
+    );
+  }, [people]);
 
   const parentRelationships = graph.relationships.filter(
     (r) => r.type === "parent"
@@ -43,7 +45,13 @@ export function TreeGraph({ graph }: Props) {
 
   return (
     <>
-      <svg width={800} height={600} style={{ border: "1px solid #ccc" }}>
+      <svg
+        width={800}
+        height={600}
+        style={{ border: "1px solid #ccc" }}
+        role="group"
+        aria-label="Family tree graph"
+      >
         <defs>
           <filter id="focus-ring">
             <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#2563eb" />
@@ -80,6 +88,7 @@ export function TreeGraph({ graph }: Props) {
           return (
             <g
               key={person.id}
+              aria-selected={isSelected}
               tabIndex={0}
               role="button"
               aria-label={`Person ${person.firstName}`}

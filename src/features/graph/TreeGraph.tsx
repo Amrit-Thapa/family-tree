@@ -2,13 +2,19 @@
 
 import { useMemo, useState } from "react";
 import { FamilyGraph, PersonId } from "@/shared/types/domain";
+import { useUser } from "@/shared/context/UserContext";
+import { canWrite } from "@/shared/types/permissions";
 
 type Props = {
   graph: FamilyGraph;
+  roleOverride?: "viewer" | "editor";
 };
 
-export function TreeGraph({ graph }: Props) {
+export function TreeGraph({ graph, roleOverride }: Props) {
   const people = Object.values(graph.people);
+  const { role: contextRole } = useUser();
+  const role = roleOverride ?? contextRole;
+  const writable = canWrite(role);
 
   const [selectedId, setSelectedId] = useState<PersonId | null>(null);
 
@@ -92,7 +98,10 @@ export function TreeGraph({ graph }: Props) {
               tabIndex={0}
               role="button"
               aria-label={`Person ${person.firstName}`}
-              onClick={() => setSelectedId(person.id)}
+              onClick={() => {
+                if (!writable) return;
+                setSelectedId(person.id);
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -102,7 +111,10 @@ export function TreeGraph({ graph }: Props) {
                   handleArrowNavigation(e.key);
                 }
               }}
-              style={{ cursor: "pointer", outline: "none" }}
+              style={{
+                cursor: writable ? "pointer" : "not-allowed",
+                opacity: writable ? 1 : 0.6,
+              }}
             >
               <circle
                 cx={pos.x}

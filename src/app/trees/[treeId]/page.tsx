@@ -1,12 +1,20 @@
 import { mockFamilyTree } from "@/features/trees/mock";
 import { TreeGraph } from "@/features/graph/TreeGraph";
+import { Role } from "@/shared/types/permissions";
 
-const TreePage = () => {
-  return (
-    <div>
-      <TreeGraph graph={mockFamilyTree} />
-    </div>
-  );
+type Props = {
+  searchParams?: {
+    role?: Role;
+  };
 };
 
-export default TreePage;
+export default function TreePage({ searchParams }: Props) {
+  const effectiveRole: Role =
+    searchParams?.role === "viewer" ? "viewer" : "editor";
+
+  return (
+    <div>
+      <TreeGraph graph={mockFamilyTree} roleOverride={effectiveRole} />
+    </div>
+  );
+}

@@ -5,49 +5,47 @@
 - [x] 1.1 Initialize Next.js 14+ project with App Router, TypeScript, ESLint, and Tailwind CSS
 - [x] 1.2 Set up MongoDB connection with Mongoose singleton pattern in `src/lib/db/connection.ts`
 - [x] 1.3 Create all Mongoose model definitions in `src/lib/db/models/` (User, Session, FamilyTree, Membership, Person, TreeNode, Relationship, Invite, ClaimRequest, MergeRequest, HistoricalRecord, MediaAsset, AuditLog) with indexes as specified in the design document
-- [ ] 1.4 Set up Firebase Admin SDK initialization in `src/lib/auth/firebase-admin.ts` and Firebase client SDK in `src/lib/auth/firebase-client.ts`
-- [ ] 1.5 Create shared Zod validation schemas in `src/lib/validations/` for all entity types (tree, person, relationship, historical record, invite, claim, merge)
-- [ ] 1.6 Create custom error classes in `src/lib/utils/errors.ts` (AppError, ValidationError, AuthError, ForbiddenError, NotFoundError, ConflictError, RateLimitError) with standardized API error response format
-- [ ] 1.7 Create XSS sanitization utility in `src/lib/utils/sanitize.ts` using DOMPurify or similar library
-- [ ] 1.8 Set up Nodemailer email transporter in `src/lib/email/transporter.ts` with configurable SMTP settings via environment variables
-- [ ] 1.9 Create file storage abstraction in `src/lib/storage/` with `StorageInterface` and `LocalStorage` implementation
-- [ ] 1.10 Set up rate limiting module in `src/lib/rate-limit/limiter.ts` using `rate-limiter-flexible` with in-memory store
-- [ ] 1.11 Create Docker configuration (Dockerfile with multi-stage build, docker-compose.yml with app + mongo + nginx services, nginx.conf)
-- [ ] 1.12 Create environment variable configuration with `.env.example` documenting all required variables
+- [x] 1.4 Set up Firebase Admin SDK initialization in `src/lib/auth/firebase-admin.ts` and Firebase client SDK in `src/lib/auth/firebase-client.ts`
+- [x] 1.5 Create shared Zod validation schemas in `src/lib/validations/` for all entity types (tree, person, relationship, historical record, invite, claim, merge)
+- [x] 1.6 Create custom error classes in `src/lib/utils/errors.ts` (AppError, ValidationError, AuthError, ForbiddenError, NotFoundError, ConflictError, RateLimitError) with standardized API error response format
+- [x] 1.7 Create XSS sanitization utility in `src/lib/utils/sanitize.ts` using DOMPurify or similar library
+- [ ] 1.8 Create file storage abstraction in `src/lib/storage/` with `StorageInterface` and `LocalStorage` implementation
+- [ ] 1.9 Set up rate limiting module in `src/lib/rate-limit/limiter.ts` using `rate-limiter-flexible` with in-memory store
+- [ ] 1.10 Create Docker configuration (Dockerfile with multi-stage build, docker-compose.yml with app + mongo + nginx services, nginx.conf)
+- [ ] 1.11 Create environment variable configuration with `.env.example` documenting all required variables
 
 ## Task 2: Authentication and Session Management
 
-- [ ] 2.1 Implement `src/lib/auth/session.ts` with functions: createSession (generates crypto token, stores in MongoDB, sets HttpOnly cookie), verifySession (validates cookie token against DB), refreshSession (extends expiry if within 24h of expiration), invalidateSession (deletes from DB, clears cookie)
-- [ ] 2.2 Implement Next.js middleware in `src/middleware.ts` that intercepts protected routes, calls verifySession, redirects to /auth/signin on failure, and passes user identity to request context
-- [ ] 2.3 Implement `src/lib/services/auth.service.ts` with signIn (verify Firebase ID token, find-or-create User, create session), signOut (invalidate session), and getCurrentUser functions
-- [ ] 2.4 Create Route Handler `POST /api/auth/signin` that accepts Firebase ID token, calls auth service, returns session cookie
-- [ ] 2.5 Create Route Handler `POST /api/auth/signout` that invalidates session and clears cookie
-- [ ] 2.6 Create Route Handler `GET /api/auth/me` that returns current authenticated user profile
-- [ ] 2.7 Create sign-in page at `src/app/(public)/auth/signin/page.tsx` with GoogleSignInButton component that triggers Firebase signInWithPopup and posts ID token to /api/auth/signin
-- [ ] 2.8 Create `src/components/auth/AuthProvider.tsx` client component that provides auth context (current user, loading state, sign-out function) to the component tree
-- [ ] 2.9 Create protected layout at `src/app/(protected)/layout.tsx` that verifies session server-side and renders sidebar navigation with user profile
+- [x] 2.1 Implement `src/lib/auth/session.ts` with functions: createSession (generates crypto token, stores in MongoDB, sets HttpOnly cookie), verifySession (validates cookie token against DB), refreshSession (extends expiry if within 24h of expiration), invalidateSession (deletes from DB, clears cookie)
+- [x] 2.2 Implement Next.js middleware in `src/middleware.ts` that intercepts protected routes, calls verifySession, redirects to /auth/signin on failure, and passes user identity to request context
+- [x] 2.3 Implement `src/lib/services/auth.service.ts` with signIn (verify Firebase ID token, find-or-create User, create session), signOut (invalidate session), and getCurrentUser functions
+- [x] 2.4 Create Route Handler `POST /api/auth/signin` that accepts Firebase ID token, calls auth service, returns session cookie
+- [x] 2.5 Create Route Handler `POST /api/auth/signout` that invalidates session and clears cookie
+- [x] 2.6 Create Route Handler `GET /api/auth/me` that returns current authenticated user profile
+- [x] 2.7 Create sign-in page at `src/app/(public)/auth/signin/page.tsx` with GoogleSignInButton component that triggers Firebase signInWithPopup and posts ID token to /api/auth/signin
+- [x] 2.8 Create `src/components/auth/AuthProvider.tsx` client component that provides auth context (current user, loading state, sign-out function) to the component tree
+- [x] 2.9 Create protected layout at `src/app/(protected)/layout.tsx` that verifies session server-side and renders sidebar navigation with user profile
 
 ## Task 3: Family Tree CRUD and Soft Delete
 
-- [ ] 3.1 Implement `src/lib/services/tree.service.ts` with createTree (validate name uniqueness per user, enforce 20-tree limit, create FamilyTree + initial Admin Membership), getTree, updateTree, softDeleteTree (sole-admin check), restoreTree, and listUserTrees functions
+- [x] 3.1 Implement `src/lib/services/tree.service.ts` with createTree (validate name uniqueness per user, enforce 20-tree limit, create FamilyTree + initial Admin Membership), getTree, updateTree, softDeleteTree (sole-admin check), restoreTree, and listUserTrees functions
 - [ ] 3.2 Implement `src/lib/services/audit.service.ts` with createAuditEntry function that records operation, entity type, entity ID, actor, summary, and changes; integrate with tree service for create/update/delete operations
-- [ ] 3.3 Create Route Handlers for `/api/trees` (GET list, POST create) and `/api/trees/[treeId]` (GET detail, PATCH update, DELETE soft-delete) and `/api/trees/[treeId]/restore` (POST restore)
-- [ ] 3.4 Create Server Actions for tree creation and update forms
-- [ ] 3.5 Create dashboard page at `src/app/(protected)/dashboard/page.tsx` showing user's family trees as cards with name, description, member count, and creation date
-- [ ] 3.6 Create tree creation page at `src/app/(protected)/trees/new/page.tsx` with form for name and description
-- [ ] 3.7 Create tree-scoped layout at `src/app/(protected)/trees/[treeId]/layout.tsx` that verifies membership, determines role, and provides tree context to child routes
+- [x] 3.3 Create Route Handlers for `/api/trees` (GET list, POST create) and `/api/trees/[treeId]` (GET detail, PATCH update, DELETE soft-delete) and `/api/trees/[treeId]/restore` (POST restore)
+- [x] 3.4 Create Server Actions for tree creation and update forms
+- [x] 3.5 Create dashboard page at `src/app/(protected)/dashboard/page.tsx` showing user's family trees as cards with name, description, member count, and creation date
+- [x] 3.6 Create tree creation page at `src/app/(protected)/trees/new/page.tsx` with form for name and description
+- [x] 3.7 Create tree-scoped layout at `src/app/(protected)/trees/[treeId]/layout.tsx` that verifies membership, determines role, and provides tree context to child routes
 - [ ] 3.8 Create tree settings page at `src/app/(protected)/trees/[treeId]/settings/page.tsx` (admin-only) with edit form and soft-delete action with confirmation dialog
 
 ## Task 4: Membership, Invites, and Collaboration
 
 - [ ] 4.1 Implement `src/lib/services/membership.service.ts` with getMembers, changeMemberRole (enforce last-admin protection), removeMember (enforce last-admin protection, immediate access revocation), and getMembership (for authorization checks) functions
-- [ ] 4.2 Implement `src/lib/services/invite.service.ts` with createInvite (generate crypto token, set 7-day expiry), acceptInvite (validate token, check expiry, check existing membership, create Membership), revokeInvite, and listPendingInvites functions
-- [ ] 4.3 Create email templates for invite notification in `src/lib/email/templates/` using HTML templates with invite link, tree name, and inviter name
-- [ ] 4.4 Implement `src/lib/services/notification.service.ts` with sendInviteEmail, sendClaimNotification, sendMembershipChangeEmail, sendOwnershipTransferEmail, and sendCrossTreeEditNotification functions; respect user notification preferences; send asynchronously
-- [ ] 4.5 Create Route Handlers for `/api/trees/[treeId]/members` (GET list, PATCH role change, DELETE remove) and `/api/trees/[treeId]/invites` (POST create, GET list, DELETE revoke)
-- [ ] 4.6 Create Route Handler `POST /api/invites/[token]/accept` for accepting invites (no tree context needed, token-based lookup)
-- [ ] 4.7 Create member management page at `src/app/(protected)/trees/[treeId]/members/page.tsx` (admin-only) showing member list with role badges, role change dropdowns, remove buttons, and invite form
-- [ ] 4.8 Create invite acceptance page at `src/app/(protected)/invite/[token]/page.tsx` showing tree name, inviter, role, and accept/decline buttons
+- [ ] 4.2 Implement `src/lib/services/invite.service.ts` with createInviteLink (generate crypto token, set expiry, set maxUses, optional label, return full invite URL), acceptInvite (validate token, check expiry, check maxUses vs usedCount, check existing membership, create Membership, increment usedCount, record acceptedBy entry), revokeInvite, and listActiveInvites functions
+- [ ] 4.3 Create Route Handlers for `/api/trees/[treeId]/members` (GET list, PATCH role change, DELETE remove) and `/api/trees/[treeId]/invites` (POST generate link, GET list active links, DELETE revoke)
+- [ ] 4.4 Create Route Handler `POST /api/invites/[token]/accept` for accepting invite links (authenticated user, token-based lookup, validates expiry and usage limits)
+- [ ] 4.5 Create member management page at `src/app/(protected)/trees/[treeId]/members/page.tsx` (admin-only) showing member list with role badges, role change dropdowns, remove buttons, and invite link generation section with role selector, optional label input, optional max-uses input, "Generate Link" button, and "Copy Link" button that copies the URL to clipboard
+- [ ] 4.6 Create active invite links list on the member management page showing each link's label, role, expiry date, usage count (e.g., "2/5 used"), and a revoke button
+- [ ] 4.7 Create invite acceptance page at `src/app/(protected)/invite/[token]/page.tsx` showing tree name, role being granted, inviter name, and accept/decline buttons; handle expired/exhausted/already-member states with appropriate error messages
 
 ## Task 5: Admin Succession and Ownership Transfer
 
@@ -154,9 +152,9 @@
 
 ## Task 19: Notification System Integration
 
-- [ ] 19.1 Create all email templates in `src/lib/email/templates/`: invite, invite-accepted, claim-submitted, claim-approved, claim-rejected, membership-removed, ownership-transfer, cross-tree-edit, inactivity-warning
-- [ ] 19.2 Integrate notification.service calls into all relevant service functions: invite.service (invite sent/accepted), claim.service (submitted/approved/rejected), membership.service (removed, role changed), merge.service (cross-tree notifications), person.service (cross-tree edit notifications)
-- [ ] 19.3 Ensure all notification emails include: event type, actor name, tree name, timestamp, and direct link to relevant page
+- [ ] 19.1 Implement in-app notification tracking: create a simple notification log that records events (claim submitted/approved/rejected, membership removed, ownership transfer, cross-tree edits) visible to relevant users on their dashboard
+- [ ] 19.2 Integrate notification calls into relevant service functions: claim.service (submitted/approved/rejected), membership.service (removed, role changed), merge.service (cross-tree notifications), person.service (cross-tree edit notifications)
+- [ ] 19.3 Display notification indicators on the dashboard for pending actions (e.g., pending claims for admins)
 
 ## Task 20: Rate Limiting Integration
 

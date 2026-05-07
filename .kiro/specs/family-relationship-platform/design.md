@@ -10,7 +10,7 @@ This document defines the technical architecture, domain model, database schema,
 - **Database**: MongoDB 7+ with Mongoose ODM
 - **Authentication**: Firebase Auth (client-side Google OAuth) → server-side ID token verification → HttpOnly cookie sessions
 - **File Storage**: Local filesystem (VPS) with configurable path, abstracted behind a storage interface for future S3 migration
-- **Email**: Nodemailer with configurable SMTP transport (SendGrid, Mailgun, or self-hosted)
+- **Email**: Removed from V1 scope — no server-side email sending; invite links are shared manually by the Admin via any channel
 - **Visualization**: D3.js or react-force-graph for interactive tree rendering
 - **Deployment**: Docker + docker-compose on VPS behind Nginx reverse proxy
 
@@ -321,17 +321,22 @@ const RelationshipSchema = new Schema({
 ```javascript
 const InviteSchema = new Schema({
   treeId: { type: Schema.Types.ObjectId, ref: 'FamilyTree', required: true },
-  email: { type: String, required: true },
   role: { type: String, enum: ['admin', 'editor', 'viewer'], required: true },
   token: { type: String, required: true, unique: true, index: true },
+  label: { type: String, maxlength: 100 }, // Optional label for tracking (e.g., "For Uncle Raj")
   invitedBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, enum: ['pending', 'accepted', 'expired', 'revoked'], default: 'pending' },
+  status: { type: String, enum: ['active', 'expired', 'revoked', 'exhausted'], default: 'active' },
+  maxUses: { type: Number, default: 1 }, // Maximum number of times this link can be used
+  usedCount: { type: Number, default: 0 }, // How many times it has been used
   expiresAt: { type: Date, required: true },
-  acceptedAt: { type: Date },
-  acceptedBy: { type: Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now },
+  // Track who accepted via this link
+  acceptedBy: [{ 
+    userId: { type: Schema.Types.ObjectId, ref: 'User' },
+    acceptedAt: { type: Date }
+  }],
 });
-// Indexes: { token: 1 }, { treeId: 1, email: 1 }, { expiresAt: 1 }
+// Indexes: { token: 1 }, { treeId: 1, status: 1 }, { expiresAt: 1 }
 ```
 
 ### 3.9 ClaimRequest Collection
@@ -479,12 +484,12 @@ All API routes live under `/api/` as Next.js Route Handlers. Server Actions are 
   POST   /api/trees/[treeId]/transfer          — Initiate ownership transfer
 
 /api/trees/[treeId]/invites/
-  POST   /api/trees/[treeId]/invites           — Create invite
-  GET    /api/trees/[treeId]/invites           — List pending invites
-  DELETE /api/trees/[treeId]/invites/[inviteId] — Revoke invite
+  POST   /api/trees/[treeId]/invites           — Generate invite link (returns URL with token)
+  GET    /api/trees/[treeId]/invites           — List active invite links
+  DELETE /api/trees/[treeId]/invites/[inviteId] — Revoke invite link
 
 /api/invites/[token]/accept
-  POST   /api/invites/[token]/accept           — Accept invite (no tree context needed)
+  POST   /api/invites/[token]/accept           — Accept invite link (authenticated user joins tree)
 
 /api/trees/[treeId]/persons/
   GET    /api/trees/[treeId]/persons           — List persons in tree

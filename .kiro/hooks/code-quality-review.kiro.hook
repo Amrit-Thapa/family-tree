@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Code Quality Review",
+  "description": "Analyzes modified source code files for potential improvements including code smells, design patterns, and best practices. Generates suggestions for improving readability, maintainability, and performance while maintaining existing functionality.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "src/**/*.ts",
+      "src/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Analyze the modified code for potential improvements. Look for:\n1. Code smells (long methods, duplicated logic, overly complex conditionals, magic numbers)\n2. Design pattern opportunities (where a pattern could simplify or improve the code)\n3. Best practices (proper error handling, type safety, naming conventions, single responsibility)\n4. Readability improvements (clearer variable names, better function decomposition, useful comments)\n5. Maintainability concerns (tight coupling, missing abstractions, hard-coded values)\n6. Performance optimizations (unnecessary re-renders, inefficient algorithms, memory leaks)\n\nProvide concise, actionable suggestions that maintain existing functionality. Prioritize the most impactful improvements and explain why each change would be beneficial."
+  },
+  "workspaceFolderName": "family-tree",
+  "shortName": "code-quality-review"
+}

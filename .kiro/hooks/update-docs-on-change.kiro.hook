@@ -1,0 +1,23 @@
+{
+  "enabled": true,
+  "name": "Update Docs on Source Change",
+  "description": "When source files (TypeScript, TSX, CSS, config files) are edited, ask the agent to review the change and update the README or relevant documentation to reflect the current state of the project.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "*.ts",
+      "*.tsx",
+      "*.css",
+      "*.mjs",
+      "next.config.ts",
+      "package.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file was just edited. Review the change and determine if the README.md needs to be updated to reflect new or modified functionality, API endpoints, components, configuration, or setup instructions. If a /docs folder exists, update relevant docs there too. Only make documentation changes if the code change is meaningful (e.g., new features, changed APIs, updated dependencies, architectural changes). Skip trivial changes like formatting or minor refactors."
+  },
+  "workspaceFolderName": "family-tree",
+  "shortName": "update-docs-on-change"
+}

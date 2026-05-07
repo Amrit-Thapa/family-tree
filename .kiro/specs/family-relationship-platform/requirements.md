@@ -25,7 +25,7 @@ Automatic relationship inference is deferred to a later phase. This is a public 
 - **Admin**: A Membership role granting full control over a Family_Tree, including managing other members, editing all Persons and Relationships, modifying tree settings, reviewing claims, and managing merges
 - **Editor**: A Membership role granting the ability to add and edit Persons and Relationships within a Family_Tree, but not manage members or tree settings
 - **Viewer**: A Membership role granting read-only access to a Family_Tree's Persons, Relationships, and historical records
-- **Invite**: A mechanism for an Admin to grant a new User access to a Family_Tree with a specified role
+- **Invite**: A shareable link mechanism for an Admin to grant new Users access to a Family_Tree with a specified role; the Admin generates the link and shares it manually via any channel (WhatsApp, text, email, in-person)
 - **Historical_Record**: A structured entry attached to a Person capturing life events, stories, migration history, documents, or other family knowledge meant for generational preservation
 - **Media_Asset**: A photo, document, or file uploaded and associated with a Person, a Historical_Record, or a Family_Tree
 - **Linked_Person**: A Person entity that has been claimed by and verified for a User account, establishing that the User "is" that Person in the family graph; requires Admin approval
@@ -97,20 +97,23 @@ Automatic relationship inference is deferred to a later phase. This is a public 
 
 ### Requirement 5: Family Tree Collaboration and Role-Based Access
 
-**User Story:** As a Family_Tree Admin, I want to invite other Users to collaborate on my family tree with specific roles, so that family knowledge management is a shared responsibility.
+**User Story:** As a Family_Tree Admin, I want to generate shareable invite links for my family tree with specific roles, so that I can share them with family members via any channel (WhatsApp, text, in-person) and they can join the tree.
 
 #### Acceptance Criteria
 
-1. WHILE a User holds the Admin role on a Family_Tree, THE Platform SHALL allow the Admin to create Invites by specifying an email address and a role (Admin, Editor, or Viewer).
-2. WHEN an Admin creates an Invite, THE Platform SHALL generate a unique, cryptographically random invite token with a configurable expiration (default: 7 days) and send an invitation email to the specified address.
-3. WHEN a User accepts a valid, non-expired Invite, THE Platform SHALL create a Membership record associating the User with the Family_Tree at the specified role.
-4. IF a User attempts to accept an Invite that has expired, THEN THE Platform SHALL display an error message indicating the invite has expired and suggest the User request a new invite from the Admin.
-5. IF a User attempts to accept an Invite for a Family_Tree where the User already has a Membership, THEN THE Platform SHALL display a message indicating the User is already a member and SHALL NOT create a duplicate Membership.
-6. WHILE a User holds the Admin role on a Family_Tree, THE Platform SHALL allow the Admin to change any member's role or remove any member, except that an Admin SHALL NOT be able to remove or demote the last remaining Admin from the Family_Tree.
-7. WHEN a Membership is removed, THE Platform SHALL revoke the User's access to the Family_Tree immediately, and subsequent requests by that User to access the Family_Tree SHALL be denied.
-8. THE Platform SHALL enforce that every active Family_Tree has at least one Admin at all times.
-9. WHILE a User holds the Viewer role on a Family_Tree, THE Platform SHALL restrict the User to read-only access: the Viewer SHALL be able to view Persons, Relationships, Historical_Records, and Media_Assets (subject to Field_Visibility settings) but SHALL NOT be able to create, edit, or delete any of them.
-10. WHILE a User holds the Editor role on a Family_Tree, THE Platform SHALL allow the Editor to create, edit, and delete Persons, Relationships, Historical_Records, and Media_Assets within the Family_Tree, but SHALL NOT allow the Editor to manage Memberships, modify tree settings, review Claim_Requests, or approve Merge_Requests.
+1. WHILE a User holds the Admin role on a Family_Tree, THE Platform SHALL allow the Admin to generate an Invite link by specifying a role (Admin, Editor, or Viewer), an optional label (up to 100 characters for tracking purposes, e.g., "For Uncle Raj"), and an optional maximum number of uses (default: 1).
+2. WHEN an Admin generates an Invite link, THE Platform SHALL create an Invite record with a unique, cryptographically random token, the specified role, a configurable expiration (default: 7 days), and a maximum use count, and SHALL return the full invite URL to the Admin for copying.
+3. THE Platform SHALL display the generated invite URL in a "Copy Link" UI element that copies the URL to the clipboard on click, without sending any email.
+4. WHEN an authenticated User visits a valid, non-expired Invite link that has not exceeded its maximum use count, THE Platform SHALL create a Membership record associating the User with the Family_Tree at the specified role and increment the Invite's used count.
+5. IF a User visits an Invite link that has expired, THEN THE Platform SHALL display an error message indicating the invite has expired and suggest the User request a new invite link from the Admin.
+6. IF a User visits an Invite link that has reached its maximum use count, THEN THE Platform SHALL display an error message indicating the invite link is no longer valid.
+7. IF a User visits an Invite link for a Family_Tree where the User already has a Membership, THEN THE Platform SHALL display a message indicating the User is already a member and SHALL NOT create a duplicate Membership.
+8. WHILE a User holds the Admin role on a Family_Tree, THE Platform SHALL allow the Admin to view all active invite links with their label, role, expiry, usage count, and creation date, and SHALL allow the Admin to revoke any active invite link.
+9. WHILE a User holds the Admin role on a Family_Tree, THE Platform SHALL allow the Admin to change any member's role or remove any member, except that an Admin SHALL NOT be able to remove or demote the last remaining Admin from the Family_Tree.
+10. WHEN a Membership is removed, THE Platform SHALL revoke the User's access to the Family_Tree immediately, and subsequent requests by that User to access the Family_Tree SHALL be denied.
+11. THE Platform SHALL enforce that every active Family_Tree has at least one Admin at all times.
+12. WHILE a User holds the Viewer role on a Family_Tree, THE Platform SHALL restrict the User to read-only access: the Viewer SHALL be able to view Persons, Relationships, Historical_Records, and Media_Assets (subject to Field_Visibility settings) but SHALL NOT be able to create, edit, or delete any of them.
+13. WHILE a User holds the Editor role on a Family_Tree, THE Platform SHALL allow the Editor to create, edit, and delete Persons, Relationships, Historical_Records, and Media_Assets within the Family_Tree, but SHALL NOT allow the Editor to manage Memberships, modify tree settings, review Claim_Requests, or approve Merge_Requests.
 
 ### Requirement 6: Admin Succession and Ownership Transfer
 
@@ -309,15 +312,15 @@ Automatic relationship inference is deferred to a later phase. This is a public 
 
 ### Requirement 20: Notification System
 
-**User Story:** As a User, I want to receive email notifications for important trust-related actions, so that I stay informed about changes that affect my family trees and identity.
+**User Story:** As a User, I want to be notified of important trust-related actions, so that I stay informed about changes that affect my family trees and identity.
 
 #### Acceptance Criteria
 
-1. THE Platform SHALL send email notifications for the following events: invite sent, invite accepted, Claim_Request submitted, Claim_Request approved, Claim_Request rejected, Membership removed, Ownership_Transfer initiated, and Ownership_Transfer completed.
-2. WHEN a Person_Profile field is edited on a Person that is referenced in multiple Family_Trees, THE Platform SHALL send a notification email to the Admins of all affected Family_Trees summarizing the change.
-3. THE Platform SHALL include in each notification email: the event type, the acting User's name, the affected Family_Tree name, a timestamp, and a direct link to the relevant page in the Platform.
+1. THE Platform SHALL track notifications for the following events: invite link accepted, Claim_Request submitted, Claim_Request approved, Claim_Request rejected, Membership removed, Ownership_Transfer initiated, and Ownership_Transfer completed.
+2. WHEN a Person_Profile field is edited on a Person that is referenced in multiple Family_Trees, THE Platform SHALL notify the Admins of all affected Family_Trees summarizing the change.
+3. THE Platform SHALL include in each notification: the event type, the acting User's name, the affected Family_Tree name, a timestamp, and a direct link to the relevant page in the Platform.
 4. THE Platform SHALL allow Users to configure notification preferences, with the ability to opt out of non-critical notifications (but not trust-related notifications such as Claim_Requests and Membership removals).
-5. THE Platform SHALL send notification emails asynchronously so that the triggering action is not delayed by email delivery.
+5. THE Platform SHALL process notifications asynchronously so that the triggering action is not delayed by notification delivery.
 
 ### Requirement 21: Audit Trail
 

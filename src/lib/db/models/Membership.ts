@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
+import type { MembershipRole } from '@/lib/types/membership';
 
-export type MembershipRole = 'admin' | 'editor' | 'viewer';
+export type { MembershipRole };
 
 export interface IMembership extends Document {
   _id: Types.ObjectId;

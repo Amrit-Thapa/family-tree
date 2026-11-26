@@ -1,16 +1,17 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 
-export type RelationshipType = 'parent_child' | 'spouse' | 'sibling';
-export type RelationshipDirection = 'forward' | 'inverse';
+export type RelationshipType = 'father' | 'mother' | 'spouse';
+export type SpouseStatus = 'active' | 'divorced' | 'separated';
 
 export interface IRelationship extends Document {
   _id: Types.ObjectId;
   treeId: Types.ObjectId;
   fromPersonId: Types.ObjectId;
   toPersonId: Types.ObjectId;
+  /** 'father' = fromPerson is father of toPerson, 'mother' = fromPerson is mother of toPerson, 'spouse' = married pair */
   type: RelationshipType;
-  direction: RelationshipDirection;
-  label?: string;
+  /** Only applicable for spouse relationships */
+  spouseStatus?: SpouseStatus;
   createdBy: Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
@@ -37,15 +38,14 @@ const RelationshipSchema = new Schema<IRelationship>(
     },
     type: {
       type: String,
-      enum: ['parent_child', 'spouse', 'sibling'],
+      enum: ['father', 'mother', 'spouse'],
       required: true,
     },
-    direction: {
+    spouseStatus: {
       type: String,
-      enum: ['forward', 'inverse'],
-      required: true,
+      enum: ['active', 'divorced', 'separated'],
+      default: 'active',
     },
-    label: { type: String, maxlength: 50 },
     createdBy: {
       type: Schema.Types.ObjectId,
       ref: 'User',

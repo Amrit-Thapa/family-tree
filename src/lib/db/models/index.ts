@@ -27,7 +27,7 @@ export type { ITreeNode, IDisplayPosition } from './TreeNode';
 export type {
   IRelationship,
   RelationshipType,
-  RelationshipDirection,
+  SpouseStatus,
 } from './Relationship';
 export type { IInvite, InviteStatus } from './Invite';
 export type { IClaimRequest, ClaimStatus } from './ClaimRequest';

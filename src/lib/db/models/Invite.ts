@@ -10,6 +10,8 @@ export interface IInviteAcceptance {
   acceptedAt: Date;
 }
 
+export type InviteRelationshipType = 'father' | 'mother' | 'spouse';
+
 export interface IInvite extends Document {
   _id: Types.ObjectId;
   treeId: Types.ObjectId;
@@ -23,6 +25,11 @@ export interface IInvite extends Document {
   expiresAt: Date;
   acceptedBy: IInviteAcceptance[];
   createdAt: Date;
+  relationshipType?: InviteRelationshipType;
+  targetPersonNodeId?: Types.ObjectId;
+  inviteeIsParent?: boolean;
+  /** When set, accepting this invite links the user to this existing TreeNode instead of creating a new one */
+  claimNodeId?: Types.ObjectId;
   computedStatus(): InviteStatus;
   isAcceptable(): boolean;
 }
@@ -70,6 +77,25 @@ const InviteSchema = new Schema<IInvite>({
   expiresAt: { type: Date, required: true },
   acceptedBy: { type: [InviteAcceptanceSchema], default: [] },
   createdAt: { type: Date, default: Date.now },
+  relationshipType: {
+    type: String,
+    enum: ['father', 'mother', 'spouse'],
+    required: false,
+  },
+  targetPersonNodeId: {
+    type: Schema.Types.ObjectId,
+    ref: 'TreeNode',
+    required: false,
+  },
+  inviteeIsParent: {
+    type: Boolean,
+    required: false,
+  },
+  claimNodeId: {
+    type: Schema.Types.ObjectId,
+    ref: 'TreeNode',
+    required: false,
+  },
 });
 
 // --- Indexes ---
@@ -81,12 +107,30 @@ InviteSchema.index({ expiresAt: 1 });
 // Supports lookup of acceptances by userId (application-level duplicate prevention).
 InviteSchema.index({ 'acceptedBy.userId': 1 });
 
+// --- Indexes ---
+
+// Sparse index on targetPersonNodeId for lookups when soft-deleting a person node.
+InviteSchema.index({ targetPersonNodeId: 1 }, { sparse: true });
+
 // --- Validation ---
 
 // usedCount may equal maxUses (exhausted state) but must never exceed it.
 InviteSchema.pre('validate', function () {
   if (this.usedCount > this.maxUses) {
     throw new Error('usedCount cannot exceed maxUses');
+  }
+
+  // Relationship field consistency: all-or-nothing for relationshipType + targetPersonNodeId
+  if ((this.targetPersonNodeId || this.inviteeIsParent !== undefined) && !this.relationshipType) {
+    throw new Error('relationshipType is required when targetPersonNodeId or inviteeIsParent is set');
+  }
+  if (this.relationshipType && !this.targetPersonNodeId) {
+    throw new Error('targetPersonNodeId is required when relationshipType is set');
+  }
+
+  // inviteeIsParent is only meaningful for father/mother relationships
+  if (this.relationshipType === 'spouse' && this.inviteeIsParent !== undefined) {
+    throw new Error('inviteeIsParent is not applicable for spouse relationships');
   }
 });
 

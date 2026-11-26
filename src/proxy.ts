@@ -36,15 +36,15 @@ export async function proxy(request: NextRequest) {
   const sessionToken = request.cookies.get(COOKIE_NAME)?.value;
 
   if (!sessionToken) {
-    return redirectToSignIn(request);
+    return unauthenticatedResponse(request);
   }
 
   // Verify the session against the database
   const session = await verifySessionToken(sessionToken);
 
   if (!session) {
-    // Invalid or expired session — redirect to sign-in
-    const response = redirectToSignIn(request);
+    // Invalid or expired session — redirect to sign-in (or 401 for API routes)
+    const response = unauthenticatedResponse(request);
     // Clear the invalid cookie
     response.cookies.delete(COOKIE_NAME);
     return response;
@@ -53,6 +53,7 @@ export async function proxy(request: NextRequest) {
   // Session is valid — forward user identity via request headers
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-user-id', session.userId.toString());
+  requestHeaders.set('x-pathname', pathname);
 
   const response = NextResponse.next({
     request: {
@@ -93,17 +94,40 @@ function isPublicRoute(pathname: string): boolean {
   // API auth routes (signin/signout endpoints)
   if (pathname.startsWith('/api/auth/')) return true;
 
-  // Invite acceptance (needs to be accessible for the accept flow)
-  if (pathname.startsWith('/invite/')) return true;
+  // Note: /invite/* is intentionally NOT public. The invite page requires a
+  // session, so unauthenticated visitors are redirected to sign-in with a
+  // callbackUrl that brings them back to the invite after signing in.
 
   return false;
 }
 
 /**
+ * Response for a request without a valid session.
+ * API routes get a JSON 401 in the standard error format (clients calling
+ * the API should never receive an HTML redirect); pages are redirected to
+ * the sign-in page.
+ */
+function unauthenticatedResponse(request: NextRequest): NextResponse {
+  if (request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.json(
+      { error: { code: 'NOT_AUTHENTICATED', message: 'Not authenticated' } },
+      { status: 401 }
+    );
+  }
+  return redirectToSignIn(request);
+}
+
+/**
  * Creates a redirect response to the sign-in page.
+ * Includes the current pathname as a callbackUrl so the user
+ * is returned to their original destination after signing in.
  */
 function redirectToSignIn(request: NextRequest): NextResponse {
   const signInUrl = new URL('/auth/signin', request.url);
+  const { pathname } = request.nextUrl;
+  if (pathname && pathname !== '/') {
+    signInUrl.searchParams.set('callbackUrl', pathname + request.nextUrl.search);
+  }
   return NextResponse.redirect(signInUrl, 302);
 }
 

@@ -1,17 +1,14 @@
 import { NextRequest } from 'next/server';
 import { requireSession } from '@/lib/auth/require-session';
-import { connectDB } from '@/lib/db/connection';
-import Membership from '@/lib/db/models/Membership';
 import {
   getTree,
   updateTree,
   softDeleteTree,
 } from '@/lib/services/tree.service';
-import { NotFoundError } from '@/lib/utils/errors';
 import { apiHandlerWithParams } from '@/lib/utils/api-handler';
 import { validateBody } from '@/lib/utils/validate-body';
+import { verifyTreeMembership } from '@/lib/utils/verify-tree-membership';
 import { updateTreeSchema } from '@/lib/validations/tree';
-import { Types } from 'mongoose';
 
 /**
  * GET /api/trees/[treeId]
@@ -28,8 +25,7 @@ export const GET = apiHandlerWithParams<{ treeId: string }>(
     const { treeId } = await params;
     const session = await requireSession();
 
-    // Verify membership — return 404 if no access (don't leak tree existence)
-    await verifyMembership(session.userId, treeId);
+    await verifyTreeMembership(session.userId, treeId);
 
     const tree = await getTree(treeId);
 
@@ -52,8 +48,7 @@ export const PATCH = apiHandlerWithParams<{ treeId: string }>(
     const { treeId } = await params;
     const session = await requireSession();
 
-    // Verify admin membership — return 404 if no access
-    await verifyMembership(session.userId, treeId, 'admin');
+    await verifyTreeMembership(session.userId, treeId, 'admin');
 
     const input = await validateBody(request, updateTreeSchema);
     const tree = await updateTree(treeId, session.userId, input);
@@ -76,46 +71,10 @@ export const DELETE = apiHandlerWithParams<{ treeId: string }>(
     const { treeId } = await params;
     const session = await requireSession();
 
-    // Verify admin membership — return 404 if no access
-    await verifyMembership(session.userId, treeId, 'admin');
+    await verifyTreeMembership(session.userId, treeId, 'admin');
 
     const tree = await softDeleteTree(treeId, session.userId);
 
     return Response.json({ tree }, { status: 200 });
   }
 );
-
-// --- Helpers ---
-
-/**
- * Verifies that the user has an active membership on the tree.
- * Optionally checks for a specific role.
- * Throws NotFoundError (404) if no membership exists — avoids leaking tree existence.
- */
-async function verifyMembership(
-  userId: string,
-  treeId: string,
-  requiredRole?: 'admin' | 'editor' | 'viewer'
-): Promise<void> {
-  if (!Types.ObjectId.isValid(treeId)) {
-    throw new NotFoundError('Family tree not found', 'TREE_NOT_FOUND');
-  }
-
-  await connectDB();
-
-  const query: Record<string, unknown> = {
-    userId: new Types.ObjectId(userId),
-    treeId: new Types.ObjectId(treeId),
-    deletedAt: null,
-  };
-
-  if (requiredRole) {
-    query.role = requiredRole;
-  }
-
-  const membership = await Membership.findOne(query);
-
-  if (!membership) {
-    throw new NotFoundError('Family tree not found', 'TREE_NOT_FOUND');
-  }
-}

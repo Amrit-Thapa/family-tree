@@ -28,6 +28,7 @@ describe('TreeProvider', () => {
       tree: mockTree,
       role: 'admin',
       membershipId: 'membership-1',
+      userId: 'user-123',
       children: createElement('div', null, 'child content'),
     });
 
@@ -35,6 +36,7 @@ describe('TreeProvider', () => {
     expect(element.props.tree).toEqual(mockTree);
     expect(element.props.role).toBe('admin');
     expect(element.props.membershipId).toBe('membership-1');
+    expect(element.props.userId).toBe('user-123');
   });
 
   it('TreeContextValue type includes expected fields', () => {
@@ -43,10 +45,12 @@ describe('TreeProvider', () => {
       tree: mockTree,
       role: 'editor',
       membershipId: 'membership-2',
+      userId: 'user-456',
     };
 
     expect(mockContext.tree.id).toBe('507f1f77bcf86cd799439011');
     expect(mockContext.role).toBe('editor');
     expect(mockContext.membershipId).toBe('membership-2');
+    expect(mockContext.userId).toBe('user-456');
   });
 });

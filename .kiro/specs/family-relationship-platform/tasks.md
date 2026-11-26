@@ -35,17 +35,17 @@
 - [x] 3.5 Create dashboard page at `src/app/(protected)/dashboard/page.tsx` showing user's family trees as cards with name, description, member count, and creation date
 - [x] 3.6 Create tree creation page at `src/app/(protected)/trees/new/page.tsx` with form for name and description
 - [x] 3.7 Create tree-scoped layout at `src/app/(protected)/trees/[treeId]/layout.tsx` that verifies membership, determines role, and provides tree context to child routes
-- [ ] 3.8 Create tree settings page at `src/app/(protected)/trees/[treeId]/settings/page.tsx` (admin-only) with edit form and soft-delete action with confirmation dialog
+- [x] 3.8 Create tree settings page at `src/app/(protected)/trees/[treeId]/settings/page.tsx` (admin-only) with edit form and soft-delete action with confirmation dialog
 
 ## Task 4: Membership, Invites, and Collaboration
 
-- [ ] 4.1 Implement `src/lib/services/membership.service.ts` with getMembers, changeMemberRole (enforce last-admin protection), removeMember (enforce last-admin protection, immediate access revocation), and getMembership (for authorization checks) functions
-- [ ] 4.2 Implement `src/lib/services/invite.service.ts` with createInviteLink (generate crypto token, set expiry, set maxUses, optional label, return full invite URL), acceptInvite (validate token, check expiry, check maxUses vs usedCount, check existing membership, create Membership, increment usedCount, record acceptedBy entry), revokeInvite, and listActiveInvites functions
-- [ ] 4.3 Create Route Handlers for `/api/trees/[treeId]/members` (GET list, PATCH role change, DELETE remove) and `/api/trees/[treeId]/invites` (POST generate link, GET list active links, DELETE revoke)
-- [ ] 4.4 Create Route Handler `POST /api/invites/[token]/accept` for accepting invite links (authenticated user, token-based lookup, validates expiry and usage limits)
-- [ ] 4.5 Create member management page at `src/app/(protected)/trees/[treeId]/members/page.tsx` (admin-only) showing member list with role badges, role change dropdowns, remove buttons, and invite link generation section with role selector, optional label input, optional max-uses input, "Generate Link" button, and "Copy Link" button that copies the URL to clipboard
-- [ ] 4.6 Create active invite links list on the member management page showing each link's label, role, expiry date, usage count (e.g., "2/5 used"), and a revoke button
-- [ ] 4.7 Create invite acceptance page at `src/app/(protected)/invite/[token]/page.tsx` showing tree name, role being granted, inviter name, and accept/decline buttons; handle expired/exhausted/already-member states with appropriate error messages
+- [x] 4.1 Implement `src/lib/services/membership.service.ts` with getMembers, changeMemberRole (enforce last-admin protection), removeMember (enforce last-admin protection, immediate access revocation), and getMembership (for authorization checks) functions
+- [x] 4.2 Implement `src/lib/services/invite.service.ts` with createInviteLink (generate crypto token, set expiry, set maxUses, optional label, return full invite URL), acceptInvite (validate token, check expiry, check maxUses vs usedCount, check existing membership, create Membership, increment usedCount, record acceptedBy entry), revokeInvite, and listActiveInvites functions
+- [x] 4.3 Create Route Handlers for `/api/trees/[treeId]/members` (GET list, PATCH role change, DELETE remove) and `/api/trees/[treeId]/invites` (POST generate link, GET list active links, DELETE revoke)
+- [x] 4.4 Create Route Handler `POST /api/invites/[token]/accept` for accepting invite links (authenticated user, token-based lookup, validates expiry and usage limits)
+- [x] 4.5 Create member management page at `src/app/(protected)/trees/[treeId]/members/page.tsx` (admin-only) showing member list with role badges, role change dropdowns, remove buttons, and invite link generation section with role selector, optional label input, optional max-uses input, "Generate Link" button, and "Copy Link" button that copies the URL to clipboard
+- [x] 4.6 Create active invite links list on the member management page showing each link's label, role, expiry date, usage count (e.g., "2/5 used"), and a revoke button
+- [x] 4.7 Create invite acceptance page at `src/app/(protected)/invite/[token]/page.tsx` showing tree name, role being granted, inviter name, and accept/decline buttons; handle expired/exhausted/already-member states with appropriate error messages
 
 ## Task 5: Admin Succession and Ownership Transfer
 

@@ -28,6 +28,13 @@ vi.mock('next/navigation', () => ({
   },
 }));
 
+vi.mock('next/headers', () => ({
+  headers: () =>
+    Promise.resolve(
+      new Map([['x-pathname', '/invite/test-token']])
+    ),
+}));
+
 // Import the layout after mocks are set up
 import ProtectedLayout from './layout';
 
@@ -44,7 +51,9 @@ describe('ProtectedLayout', () => {
       ProtectedLayout({ children: null })
     ).rejects.toThrow('NEXT_REDIRECT');
 
-    expect(mockRedirect).toHaveBeenCalledWith('/auth/signin');
+    expect(mockRedirect).toHaveBeenCalledWith(
+      '/auth/signin?callbackUrl=%2Finvite%2Ftest-token'
+    );
   });
 
   it('redirects to /auth/signin when user is not found', async () => {

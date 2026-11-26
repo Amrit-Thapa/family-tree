@@ -89,7 +89,7 @@ describe('GET /api/trees/[treeId]', () => {
 
   it('returns 200 with tree details when user has membership', async () => {
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue({ role: 'admin' });
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue({ _id: 'membership-1', role: 'admin' }) });
     mockGetTree.mockResolvedValue(mockTreeResult);
 
     const response = await GET(createGetRequest(), createContext(VALID_TREE_ID));
@@ -114,7 +114,7 @@ describe('GET /api/trees/[treeId]', () => {
 
   it('returns 404 when user has no membership on the tree', async () => {
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue(null);
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue(null) });
 
     const response = await GET(createGetRequest(), createContext(VALID_TREE_ID));
     const data = await response.json();
@@ -143,7 +143,7 @@ describe('PATCH /api/trees/[treeId]', () => {
     const updatedTree = { ...mockTreeResult, name: 'Updated Name' };
 
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue({ role: 'admin' });
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue({ _id: 'membership-1', role: 'admin' }) });
     mockUpdateTree.mockResolvedValue(updatedTree);
 
     const response = await PATCH(
@@ -178,7 +178,7 @@ describe('PATCH /api/trees/[treeId]', () => {
 
   it('returns 404 when user is not admin', async () => {
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue(null); // No admin membership found
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue(null) });
 
     const response = await PATCH(
       createPatchRequest({ name: 'Test' }),
@@ -192,7 +192,7 @@ describe('PATCH /api/trees/[treeId]', () => {
 
   it('returns 400 when body is not valid JSON', async () => {
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue({ role: 'admin' });
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue({ _id: 'membership-1', role: 'admin' }) });
 
     const request = new NextRequest(
       `http://localhost:3000/api/trees/${VALID_TREE_ID}`,
@@ -211,7 +211,7 @@ describe('PATCH /api/trees/[treeId]', () => {
 
   it('returns 400 when name exceeds 100 characters', async () => {
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue({ role: 'admin' });
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue({ _id: 'membership-1', role: 'admin' }) });
 
     const response = await PATCH(
       createPatchRequest({ name: 'a'.repeat(101) }),
@@ -237,7 +237,7 @@ describe('DELETE /api/trees/[treeId]', () => {
     };
 
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue({ role: 'admin' });
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue({ _id: 'membership-1', role: 'admin' }) });
     mockSoftDeleteTree.mockResolvedValue(deletedTree);
 
     const response = await DELETE(createDeleteRequest(), createContext(VALID_TREE_ID));
@@ -265,7 +265,7 @@ describe('DELETE /api/trees/[treeId]', () => {
 
   it('returns 404 when user is not admin', async () => {
     mockRequireSession.mockResolvedValue(mockSession);
-    mockFindOne.mockResolvedValue(null);
+    mockFindOne.mockReturnValue({ lean: vi.fn().mockResolvedValue(null) });
 
     const response = await DELETE(createDeleteRequest(), createContext(VALID_TREE_ID));
     const data = await response.json();

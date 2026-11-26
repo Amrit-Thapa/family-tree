@@ -23,7 +23,7 @@ export {
   createRelationshipSchema,
   updateRelationshipSchema,
   relationshipTypeSchema,
-  relationshipDirectionSchema,
+  spouseStatusSchema,
   type CreateRelationshipInput,
   type UpdateRelationshipInput,
 } from './relationship';

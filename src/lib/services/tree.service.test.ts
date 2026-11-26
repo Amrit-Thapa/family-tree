@@ -45,6 +45,33 @@ vi.mock('@/lib/db/models/Membership', () => ({
   },
 }));
 
+// Mock User model
+const mockUserFindById = vi.fn();
+
+vi.mock('@/lib/db/models/User', () => ({
+  default: {
+    findById: (...args: unknown[]) => mockUserFindById(...args),
+  },
+}));
+
+// Mock Person model
+const mockPersonCreate = vi.fn();
+
+vi.mock('@/lib/db/models/Person', () => ({
+  default: {
+    create: (...args: unknown[]) => mockPersonCreate(...args),
+  },
+}));
+
+// Mock TreeNode model
+const mockTreeNodeCreate = vi.fn();
+
+vi.mock('@/lib/db/models/TreeNode', () => ({
+  default: {
+    create: (...args: unknown[]) => mockTreeNodeCreate(...args),
+  },
+}));
+
 // --- Helpers ---
 
 const FAKE_USER_ID = '507f1f77bcf86cd799439011';
@@ -113,6 +140,27 @@ describe('tree.service', () => {
       };
       mockMembershipCreate.mockResolvedValue(fakeMembership);
 
+      // Mock User lookup for Person creation
+      mockUserFindById.mockResolvedValue({
+        _id: fakeObjectId(FAKE_USER_ID),
+        displayName: 'Test User',
+      });
+
+      // Mock Person creation
+      mockPersonCreate.mockResolvedValue({
+        _id: fakeObjectId('person-id-1'),
+        firstName: 'Test',
+        lastName: 'User',
+      });
+
+      // Mock TreeNode creation
+      mockTreeNodeCreate.mockResolvedValue({
+        _id: fakeObjectId('tree-node-id-1'),
+        personId: fakeObjectId('person-id-1'),
+        treeId: fakeObjectId(FAKE_TREE_ID),
+        linkedUserId: fakeObjectId(FAKE_USER_ID),
+      });
+
       const result = await createTree(FAKE_USER_ID, {
         name: 'My Family Tree',
         description: 'A test tree',
@@ -137,6 +185,10 @@ describe('tree.service', () => {
           role: 'admin',
         })
       );
+
+      // Verify Person + TreeNode were created for the tree creator
+      expect(mockPersonCreate).toHaveBeenCalledTimes(1);
+      expect(mockTreeNodeCreate).toHaveBeenCalledTimes(1);
     });
 
     it('throws ConflictError when tree name already exists for user', async () => {

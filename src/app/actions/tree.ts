@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { verifySession } from '@/lib/auth/session';
-import { createTree, updateTree } from '@/lib/services/tree.service';
+import { createTree, updateTree, softDeleteTree } from '@/lib/services/tree.service';
 import { createTreeSchema, updateTreeSchema } from '@/lib/validations/tree';
 import { objectIdSchema } from '@/lib/validations/common';
 import { AppError } from '@/lib/utils/errors';
@@ -209,4 +209,48 @@ export async function updateTreeAction(
   } catch (error: unknown) {
     return handleActionError(error);
   }
+}
+
+
+/**
+ * Server Action for soft-deleting a family tree.
+ *
+ * Validates the tree ID, authenticates the user, performs the soft delete
+ * (sole-admin check is enforced by the service layer), revalidates paths,
+ * and redirects to the dashboard.
+ *
+ * @param _prevState - Previous form state (used by useActionState)
+ * @param formData - Form data containing `treeId`
+ * @returns ActionState with success/error information
+ */
+export async function softDeleteTreeAction(
+  _prevState: ActionState | null,
+  formData: FormData
+): Promise<ActionState> {
+  const auth = await requireAuth('delete a family tree');
+  if (isActionError(auth)) return auth;
+
+  // Validate treeId format
+  const rawTreeId = formData.get('treeId');
+  const treeIdResult = objectIdSchema.safeParse(rawTreeId);
+  if (!treeIdResult.success) {
+    return {
+      success: false,
+      error: {
+        code: 'INVALID_INPUT',
+        message: 'A valid Tree ID is required',
+        field: 'treeId',
+      },
+    };
+  }
+  const treeId = treeIdResult.data;
+
+  try {
+    await softDeleteTree(treeId, auth.userId);
+  } catch (error: unknown) {
+    return handleActionError(error);
+  }
+
+  revalidatePath('/dashboard');
+  redirect('/dashboard');
 }

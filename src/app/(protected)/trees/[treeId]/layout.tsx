@@ -81,6 +81,7 @@ export default async function TreeLayout({
       tree={treeData}
       role={membership.role}
       membershipId={membership._id.toString()}
+      userId={session.userId}
     >
       {children}
     </TreeProvider>

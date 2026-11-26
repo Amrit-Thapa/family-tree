@@ -2,6 +2,10 @@ import { Types } from 'mongoose';
 import { connectDB } from '@/lib/db/connection';
 import FamilyTree, { IFamilyTree } from '@/lib/db/models/FamilyTree';
 import Membership from '@/lib/db/models/Membership';
+import Person from '@/lib/db/models/Person';
+import TreeNode from '@/lib/db/models/TreeNode';
+import User from '@/lib/db/models/User';
+import { toObjectId } from '@/lib/utils/mongo';
 import {
   ConflictError,
   ForbiddenError,
@@ -43,19 +47,6 @@ export interface CreateTreeResult {
 }
 
 // --- Helpers ---
-
-/**
- * Validates and converts a string to a Mongoose ObjectId.
- * Throws a ValidationError if the format is invalid.
- */
-function toObjectId(id: string, label: string): Types.ObjectId {
-  if (!Types.ObjectId.isValid(id)) {
-    throw new ValidationError(`Invalid ${label} ID format`, 'INVALID_ID', {
-      field: label,
-    });
-  }
-  return new Types.ObjectId(id);
-}
 
 /**
  * Checks if a Mongoose error is a duplicate key error (code 11000).
@@ -170,6 +161,26 @@ export async function createTree(
     treeId: tree._id,
     role: 'admin',
     joinedAt: new Date(),
+  });
+
+  // Create a Person + TreeNode for the tree creator so they appear in the graph
+  const user = await User.findById(userObjectId);
+  const displayName = user?.displayName || 'Unknown';
+  const nameParts = displayName.split(' ');
+  const firstName = nameParts[0] || 'Unknown';
+  const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : undefined;
+
+  const person = await Person.create({
+    firstName,
+    lastName,
+    createdBy: userObjectId,
+  });
+
+  await TreeNode.create({
+    personId: person._id,
+    treeId: tree._id,
+    linkedUserId: userObjectId,
+    addedBy: userObjectId,
   });
 
   return {

@@ -67,6 +67,25 @@ export const createPersonSchema = z.object({
 
 export const updatePersonSchema = createPersonSchema.partial();
 
+/**
+ * Schema for creating a profile-only person node (no linked user account).
+ * Only accepts the subset of fields relevant to admin-created person entries.
+ */
+export const createProfileOnlyPersonSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, 'First name is required')
+    .max(100, 'First name must be at most 100 characters'),
+  lastName: z
+    .string()
+    .max(100, 'Last name must be at most 100 characters')
+    .optional(),
+  dateOfBirth: z.string().optional(),
+  dateOfDeath: z.string().optional(),
+  gender: genderSchema.optional(),
+});
+
 export type CreatePersonInput = z.infer<typeof createPersonSchema>;
 export type UpdatePersonInput = z.infer<typeof updatePersonSchema>;
+export type CreateProfileOnlyPersonInput = z.infer<typeof createProfileOnlyPersonSchema>;
 export type FieldVisibilityLevel = z.infer<typeof fieldVisibilityLevelSchema>;

@@ -29,12 +29,13 @@ vi.mock('@/lib/db/models/Membership', () => ({
 }));
 
 vi.mock('@/components/tree/TreeProvider', () => ({
-  default: ({ children, tree, role, membershipId }: {
+  default: ({ children, tree, role, membershipId, userId }: {
     children: unknown;
     tree: unknown;
     role: string;
     membershipId: string;
-  }) => ({ type: 'TreeProvider', props: { children, tree, role, membershipId } }),
+    userId: string;
+  }) => ({ type: 'TreeProvider', props: { children, tree, role, membershipId, userId } }),
 }));
 
 vi.mock('next/navigation', () => ({

@@ -60,12 +60,30 @@ describe('proxy', () => {
       expect(mockSessionFindOne).not.toHaveBeenCalled();
     });
 
-    it('allows access to invite routes without a session', async () => {
+  });
+
+  describe('invite routes - no session', () => {
+    it('redirects to sign-in with the invite path as callbackUrl', async () => {
       const request = createRequest('http://localhost:3000/invite/abc123');
       const response = await proxy(request);
 
-      expect(response.status).toBe(200);
-      expect(mockSessionFindOne).not.toHaveBeenCalled();
+      expect(response.status).toBe(302);
+      expect(response.headers.get('location')).toBe(
+        'http://localhost:3000/auth/signin?callbackUrl=%2Finvite%2Fabc123'
+      );
+    });
+  });
+
+  describe('API routes - no session', () => {
+    it('returns a JSON 401 instead of redirecting', async () => {
+      const request = createRequest('http://localhost:3000/api/trees');
+      const response = await proxy(request);
+
+      expect(response.status).toBe(401);
+      expect(response.headers.get('location')).toBeNull();
+      expect(await response.json()).toEqual({
+        error: { code: 'NOT_AUTHENTICATED', message: 'Not authenticated' },
+      });
     });
   });
 
@@ -75,7 +93,7 @@ describe('proxy', () => {
       const response = await proxy(request);
 
       expect(response.status).toBe(302);
-      expect(response.headers.get('location')).toBe('http://localhost:3000/auth/signin');
+      expect(response.headers.get('location')).toBe('http://localhost:3000/auth/signin?callbackUrl=%2Fdashboard');
     });
 
     it('redirects to /auth/signin for nested protected routes', async () => {
@@ -83,7 +101,7 @@ describe('proxy', () => {
       const response = await proxy(request);
 
       expect(response.status).toBe(302);
-      expect(response.headers.get('location')).toBe('http://localhost:3000/auth/signin');
+      expect(response.headers.get('location')).toBe('http://localhost:3000/auth/signin?callbackUrl=%2Ftrees%2F123%2Fpersons');
     });
   });
 
@@ -99,7 +117,7 @@ describe('proxy', () => {
       const response = await proxy(request);
 
       expect(response.status).toBe(302);
-      expect(response.headers.get('location')).toBe('http://localhost:3000/auth/signin');
+      expect(response.headers.get('location')).toBe('http://localhost:3000/auth/signin?callbackUrl=%2Fdashboard');
     });
 
     it('clears the invalid session cookie on redirect', async () => {

@@ -25,6 +25,8 @@ export interface TreeContextValue {
   role: MembershipRole;
   /** The current user's membership ID. */
   membershipId: string;
+  /** The current user's ID. */
+  userId: string;
 }
 
 const TreeContext = createContext<TreeContextValue | undefined>(undefined);
@@ -35,6 +37,7 @@ interface TreeProviderProps {
   tree: TreeData;
   role: MembershipRole;
   membershipId: string;
+  userId: string;
 }
 
 /**
@@ -49,10 +52,11 @@ export default function TreeProvider({
   tree,
   role,
   membershipId,
+  userId,
 }: TreeProviderProps) {
   const value = useMemo(
-    () => ({ tree, role, membershipId }),
-    [tree, role, membershipId]
+    () => ({ tree, role, membershipId, userId }),
+    [tree, role, membershipId, userId]
   );
 
   return (

@@ -5,7 +5,23 @@ export const metadata = {
   description: 'Sign in with your Google account to access the Family Relationship Platform.',
 };
 
-export default function SignInPage() {
+interface SignInPageProps {
+  searchParams: Promise<{ callbackUrl?: string }>;
+}
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
+  const { callbackUrl } = await searchParams;
+
+  // Validate callbackUrl: only allow same-origin relative paths to prevent
+  // open redirect. "//evil.com" and "/\evil.com" are protocol-relative URLs
+  // that browsers resolve to another origin, so they are rejected.
+  const isSafeCallback =
+    !!callbackUrl &&
+    callbackUrl.startsWith('/') &&
+    !callbackUrl.startsWith('//') &&
+    !callbackUrl.startsWith('/\\');
+  const redirectTo = isSafeCallback ? callbackUrl : '/dashboard';
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-sm space-y-8 text-center">
@@ -18,7 +34,7 @@ export default function SignInPage() {
           </p>
         </div>
 
-        <GoogleSignInButton />
+        <GoogleSignInButton redirectTo={redirectTo} />
       </div>
     </div>
   );

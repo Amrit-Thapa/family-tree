@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createTreeAction, updateTreeAction, ActionState } from './tree';
+import { createTreeAction, updateTreeAction, softDeleteTreeAction, ActionState } from './tree';
 import {
   ConflictError,
   ValidationError,
@@ -11,6 +11,7 @@ import {
 const mockVerifySession = vi.fn();
 const mockCreateTree = vi.fn();
 const mockUpdateTree = vi.fn();
+const mockSoftDeleteTree = vi.fn();
 const mockRevalidatePath = vi.fn();
 const mockRedirect = vi.fn();
 
@@ -21,6 +22,7 @@ vi.mock('@/lib/auth/session', () => ({
 vi.mock('@/lib/services/tree.service', () => ({
   createTree: (...args: unknown[]) => mockCreateTree(...args),
   updateTree: (...args: unknown[]) => mockUpdateTree(...args),
+  softDeleteTree: (...args: unknown[]) => mockSoftDeleteTree(...args),
 }));
 
 vi.mock('next/cache', () => ({
@@ -410,5 +412,117 @@ describe('updateTreeAction', () => {
     const result = await updateTreeAction(prevState, formData);
 
     expect(result.success).toBe(true);
+  });
+});
+
+
+describe('softDeleteTreeAction', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns error when not authenticated', async () => {
+    mockVerifySession.mockResolvedValue(null);
+
+    const formData = createFormData({ treeId: '507f1f77bcf86cd799439022' });
+    const result = await softDeleteTreeAction(null, formData);
+
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe('NOT_AUTHENTICATED');
+    expect(mockSoftDeleteTree).not.toHaveBeenCalled();
+  });
+
+  it('returns error when treeId is missing', async () => {
+    mockVerifySession.mockResolvedValue(mockSession);
+
+    const formData = new FormData();
+    const result = await softDeleteTreeAction(null, formData);
+
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe('INVALID_INPUT');
+    expect(result.error?.field).toBe('treeId');
+  });
+
+  it('returns error when treeId is invalid format', async () => {
+    mockVerifySession.mockResolvedValue(mockSession);
+
+    const formData = createFormData({ treeId: 'not-a-valid-id' });
+    const result = await softDeleteTreeAction(null, formData);
+
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe('INVALID_INPUT');
+    expect(result.error?.field).toBe('treeId');
+  });
+
+  it('soft-deletes tree and redirects to dashboard on success', async () => {
+    mockVerifySession.mockResolvedValue(mockSession);
+    mockSoftDeleteTree.mockResolvedValue({
+      id: '507f1f77bcf86cd799439022',
+      name: 'Deleted Tree',
+      description: null,
+      createdBy: '507f1f77bcf86cd799439011',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      deletedAt: new Date(),
+      deletedBy: '507f1f77bcf86cd799439011',
+      totalStorageBytes: 0,
+      storageLimit: 524288000,
+    });
+
+    const formData = createFormData({ treeId: '507f1f77bcf86cd799439022' });
+
+    await expect(softDeleteTreeAction(null, formData)).rejects.toThrow(
+      'NEXT_REDIRECT'
+    );
+
+    expect(mockSoftDeleteTree).toHaveBeenCalledWith(
+      '507f1f77bcf86cd799439022',
+      '507f1f77bcf86cd799439011'
+    );
+    expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard');
+    expect(mockRedirect).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('returns forbidden error when user is not admin', async () => {
+    mockVerifySession.mockResolvedValue(mockSession);
+    mockSoftDeleteTree.mockRejectedValue(
+      new ForbiddenError(
+        'Only an admin can delete a family tree',
+        'NOT_ADMIN'
+      )
+    );
+
+    const formData = createFormData({ treeId: '507f1f77bcf86cd799439022' });
+    const result = await softDeleteTreeAction(null, formData);
+
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe('NOT_ADMIN');
+  });
+
+  it('returns forbidden error when tree has multiple admins', async () => {
+    mockVerifySession.mockResolvedValue(mockSession);
+    mockSoftDeleteTree.mockRejectedValue(
+      new ForbiddenError(
+        'Cannot delete a family tree with multiple admins. Other admins must be removed first.',
+        'MULTIPLE_ADMINS'
+      )
+    );
+
+    const formData = createFormData({ treeId: '507f1f77bcf86cd799439022' });
+    const result = await softDeleteTreeAction(null, formData);
+
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe('MULTIPLE_ADMINS');
+  });
+
+  it('returns generic error on unexpected failures', async () => {
+    mockVerifySession.mockResolvedValue(mockSession);
+    mockSoftDeleteTree.mockRejectedValue(new Error('DB connection failed'));
+
+    const formData = createFormData({ treeId: '507f1f77bcf86cd799439022' });
+    const result = await softDeleteTreeAction(null, formData);
+
+    expect(result.success).toBe(false);
+    expect(result.error?.code).toBe('INTERNAL_ERROR');
   });
 });

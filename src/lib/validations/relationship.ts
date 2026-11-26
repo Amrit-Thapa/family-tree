@@ -7,30 +7,23 @@ export const objectIdSchema = z
   .regex(objectIdRegex, 'Invalid ObjectId format');
 
 export const relationshipTypeSchema = z.enum([
-  'parent_child',
+  'father',
+  'mother',
   'spouse',
-  'sibling',
 ]);
 
-export const relationshipDirectionSchema = z.enum(['forward', 'inverse']);
+export const spouseStatusSchema = z.enum(['active', 'divorced', 'separated']);
 
 export const createRelationshipSchema = z.object({
   treeId: objectIdSchema,
   fromPersonId: objectIdSchema,
   toPersonId: objectIdSchema,
   type: relationshipTypeSchema,
-  direction: relationshipDirectionSchema,
-  label: z
-    .string()
-    .max(50, 'Label must be at most 50 characters')
-    .optional(),
+  spouseStatus: spouseStatusSchema.optional(),
 });
 
 export const updateRelationshipSchema = z.object({
-  label: z
-    .string()
-    .max(50, 'Label must be at most 50 characters')
-    .optional(),
+  spouseStatus: spouseStatusSchema.optional(),
 });
 
 export type CreateRelationshipInput = z.infer<typeof createRelationshipSchema>;

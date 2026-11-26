@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import { verifySession } from '@/lib/auth/session';
 import { connectDB } from '@/lib/db/connection';
 import User from '@/lib/db/models/User';
@@ -8,9 +9,10 @@ import SidebarNav from '@/components/layout/SidebarNav';
 /**
  * Protected layout that wraps all authenticated routes.
  *
- * Verifies the session server-side and redirects to /auth/signin
- * if the session is invalid. Renders a sidebar navigation with
- * user profile information alongside the page content.
+ * The proxy layer handles the primary auth check and callbackUrl redirect.
+ * This layout serves as a secondary guard — if somehow reached without a
+ * valid session, it redirects to sign-in with the current pathname as
+ * callbackUrl so the user returns here after authenticating.
  */
 export default async function ProtectedLayout({
   children,
@@ -20,7 +22,11 @@ export default async function ProtectedLayout({
   const session = await verifySession();
 
   if (!session) {
-    redirect('/auth/signin');
+    // Read the pathname set by the proxy for callbackUrl
+    const headersList = await headers();
+    const pathname = headersList.get('x-pathname') || '/';
+    const callbackUrl = encodeURIComponent(pathname);
+    redirect(`/auth/signin?callbackUrl=${callbackUrl}`);
   }
 
   await connectDB();

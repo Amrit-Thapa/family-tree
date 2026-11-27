@@ -3,13 +3,11 @@
 import { useEffect, useRef, useState } from 'react';
 import type { GraphNodeData, GraphRelationshipData } from '@/lib/services/graph.service';
 import { groupDirectRelationships } from '@/lib/graph/group-relationships';
-import { deriveRelationships } from '@/lib/graph/derived-relationships';
+import { deriveRelationships, type DerivedRelationType } from '@/lib/graph/derived-relationships';
 import { formatDisplayName } from '@/lib/graph/format-name';
 import AddRelationshipForm from '@/components/graph/AddRelationshipForm';
-import AddPersonForm from '@/components/graph/AddPersonForm';
-
-// Alias to avoid confusion with the top-level AddPersonForm used on the page
-const AddPersonFormInline = AddPersonForm;
+import QuickAddRelationship from '@/components/graph/QuickAddRelationship';
+import type { QuickAddKind } from '@/lib/graph/link-suggestions';
 
 // --- Types ---
 
@@ -47,19 +45,60 @@ function formatDate(isoDate: string): string {
   }
 }
 
+/** Extended-family sections, in display order (siblings live under Family). */
+const EXTENDED_GROUPS: { type: DerivedRelationType; label: string }[] = [
+  { type: 'grandparent', label: 'Grandparents' },
+  { type: 'uncle_aunt', label: 'Uncles & Aunts' },
+  { type: 'cousin', label: 'Cousins' },
+  { type: 'grandchild', label: 'Grandchildren' },
+];
+
 /**
- * Maps derived relationship type to a human-readable label.
+ * One person in a relationship list: their name (opens their panel), an
+ * optional badge, and an optional remove button for stored relationships.
  */
-function getRelationshipTypeLabel(type: string): string {
-  const labels: Record<string, string> = {
-    sibling: 'Sibling',
-    'half-sibling': 'Half-Sibling',
-    grandparent: 'Grandparent',
-    grandchild: 'Grandchild',
-    uncle_aunt: 'Uncle/Aunt',
-    cousin: 'Cousin',
-  };
-  return labels[type] ?? type;
+function PersonRow({
+  name,
+  badge,
+  onOpen,
+  onRemove,
+  removeLabel,
+  removeDisabled,
+}: {
+  name: string;
+  badge?: string;
+  onOpen: () => void;
+  onRemove?: () => void;
+  removeLabel?: string;
+  removeDisabled?: boolean;
+}) {
+  return (
+    <li className="flex items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center gap-2">
+        <button
+          onClick={onOpen}
+          className="truncate text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none focus:underline"
+        >
+          {name}
+        </button>
+        {badge && (
+          <span className="shrink-0 text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+            {badge}
+          </span>
+        )}
+      </div>
+      {onRemove && (
+        <button
+          onClick={onRemove}
+          disabled={removeDisabled}
+          className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
+          aria-label={removeLabel}
+        >
+          ✕
+        </button>
+      )}
+    </li>
+  );
 }
 
 // --- Loading Skeleton ---
@@ -126,10 +165,7 @@ export default function SidePanel({
   const [isGeneratingInvite, setIsGeneratingInvite] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [quickAdd, setQuickAdd] = useState<{
-    type: 'father' | 'mother' | 'spouse';
-    direction?: 'new_is_parent' | 'new_is_child';
-  } | null>(null);
+  const [quickAdd, setQuickAdd] = useState<QuickAddKind | null>(null);
 
   // Simulate brief loading state when node changes
   useEffect(() => {
@@ -179,11 +215,11 @@ export default function SidePanel({
     ? deriveRelationships(node.id, relationships, allNodes)
     : [];
 
-  const hasDirectRelationships =
-    grouped.father !== null ||
-    grouped.mother !== null ||
-    grouped.children.length > 0 ||
-    grouped.spouses.length > 0;
+  const siblings = derived.filter((r) => r.type === 'sibling' || r.type === 'half-sibling');
+  const extendedGroups = EXTENDED_GROUPS.map((g) => ({
+    ...g,
+    people: derived.filter((r) => r.type === g.type),
+  })).filter((g) => g.people.length > 0);
 
   /**
    * Handles deleting a relationship via the API.
@@ -215,6 +251,30 @@ export default function SidePanel({
           (r.toNodeId === node?.id && r.fromNodeId === otherNodeId))
     )?.id;
   }
+
+  const quickAddForm =
+    node && quickAdd ? (
+      <div className="rounded-lg border border-indigo-100 bg-indigo-50/30 p-3">
+        <QuickAddRelationship
+          key={`${node.id}-${quickAdd}`}
+          treeId={treeId}
+          person={node}
+          kind={quickAdd}
+          relationships={relationships}
+          allNodes={allNodes}
+          onDone={() => {
+            onRelationshipCreated({
+              id: 'refresh',
+              fromNodeId: '',
+              toNodeId: '',
+              type: quickAdd === 'child' ? 'father' : quickAdd,
+            });
+            setQuickAdd(null);
+          }}
+          onCancel={() => setQuickAdd(null)}
+        />
+      </div>
+    ) : null;
 
   // Can edit: admin OR the person themselves
   const canEdit = isAdmin || (currentUserId && node?.linkedUserId === currentUserId);
@@ -620,96 +680,135 @@ export default function SidePanel({
               )}
             </div>
 
-            {/* Direct Relationships */}
+            {/* Family: parents (always shown, with slots for missing ones), spouses, siblings, children */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-                Relationships
+                Family
               </h3>
 
-              {!hasDirectRelationships ? (
-                <p className="text-sm text-gray-500 italic">
-                  No relationships found for this person.
-                </p>
-              ) : (
-                <div className="space-y-4">
-                  {/* Father */}
-                  {grouped.father && (
-                    <div>
-                      <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
-                        Father
-                      </h4>
-                      <div className="flex items-center justify-between">
-                        <button
-                          onClick={() => onNavigateToNode(grouped.father!.id)}
-                          className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none focus:underline"
-                        >
-                          {formatDisplayName(grouped.father.firstName, grouped.father.lastName)}
-                        </button>
-                        {isAdmin && (
-                          <button
-                            onClick={() => {
-                              const relId = getRelationshipId(grouped.father!.id, 'father');
-                              if (relId) handleDeleteRelationship(relId);
-                            }}
-                            disabled={deletingRelId !== null}
-                            className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-                            aria-label={`Remove father relationship`}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Mother */}
-                  {grouped.mother && (
-                    <div>
-                      <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
-                        Mother
-                      </h4>
-                      <div className="flex items-center justify-between">
-                        <button
-                          onClick={() => onNavigateToNode(grouped.mother!.id)}
-                          className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none focus:underline"
-                        >
-                          {formatDisplayName(grouped.mother.firstName, grouped.mother.lastName)}
-                        </button>
-                        {isAdmin && (
-                          <button
-                            onClick={() => {
-                              const relId = getRelationshipId(grouped.mother!.id, 'mother');
-                              if (relId) handleDeleteRelationship(relId);
-                            }}
-                            disabled={deletingRelId !== null}
-                            className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-                            aria-label={`Remove mother relationship`}
-                          >
-                            ✕
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Children */}
-                  {grouped.children.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
-                        Children
-                      </h4>
-                      <ul className="space-y-1">
-                        {grouped.children.map((child) => (
-                          <li key={child.id} className="flex items-center justify-between">
+              <div className="space-y-4">
+                {/* Parents */}
+                <div>
+                  <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">Parents</h4>
+                  <ul className="space-y-1">
+                    {(['father', 'mother'] as const).map((parentType) => {
+                      const parent = grouped[parentType];
+                      if (parent) {
+                        return (
+                          <PersonRow
+                            key={parentType}
+                            name={formatDisplayName(parent.firstName, parent.lastName)}
+                            badge={parentType === 'father' ? 'Father' : 'Mother'}
+                            onOpen={() => onNavigateToNode(parent.id)}
+                            onRemove={
+                              isAdmin
+                                ? () => {
+                                    const relId = getRelationshipId(parent.id, parentType);
+                                    if (relId) handleDeleteRelationship(relId);
+                                  }
+                                : undefined
+                            }
+                            removeLabel={`Remove ${parentType} relationship`}
+                            removeDisabled={deletingRelId !== null}
+                          />
+                        );
+                      }
+                      return (
+                        <li key={parentType}>
+                          {isAdmin ? (
                             <button
-                              onClick={() => onNavigateToNode(child.id)}
-                              className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none focus:underline"
+                              onClick={() => {
+                                setShowAddRelationship(false);
+                                setQuickAdd(parentType);
+                              }}
+                              aria-pressed={quickAdd === parentType}
+                              className={`w-full rounded-md border border-dashed px-2 py-1.5 text-left text-sm transition-colors ${
+                                quickAdd === parentType
+                                  ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
+                                  : 'border-gray-300 text-gray-500 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700'
+                              }`}
                             >
-                              {formatDisplayName(child.firstName, child.lastName)}
+                              + Add {parentType}
                             </button>
-                            {isAdmin && (
-                              <button
-                                onClick={() => {
+                          ) : (
+                            <span className="text-sm text-gray-400 italic">
+                              {parentType === 'father' ? 'Father' : 'Mother'} not added
+                            </span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {(quickAdd === 'father' || quickAdd === 'mother') && (
+                    <div className="mt-2">{quickAddForm}</div>
+                  )}
+                </div>
+
+                {/* Spouses */}
+                {grouped.spouses.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
+                      {grouped.spouses.length === 1 ? 'Spouse' : 'Spouses'}
+                    </h4>
+                    <ul className="space-y-1">
+                      {grouped.spouses.map(({ node: spouse, status }) => (
+                        <PersonRow
+                          key={spouse.id}
+                          name={formatDisplayName(spouse.firstName, spouse.lastName)}
+                          badge={status && status !== 'active' ? status.charAt(0).toUpperCase() + status.slice(1) : undefined}
+                          onOpen={() => onNavigateToNode(spouse.id)}
+                          onRemove={
+                            isAdmin
+                              ? () => {
+                                  const relId = getRelationshipId(spouse.id, 'spouse');
+                                  if (relId) handleDeleteRelationship(relId);
+                                }
+                              : undefined
+                          }
+                          removeLabel={`Delete relationship with ${spouse.firstName}`}
+                          removeDisabled={deletingRelId !== null}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Siblings (derived from shared parents, so no remove button) */}
+                {siblings.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">Siblings</h4>
+                    <ul className="space-y-1">
+                      {siblings.map((sib) => (
+                        <PersonRow
+                          key={sib.nodeId}
+                          name={sib.personName}
+                          badge={
+                            sib.type === 'half-sibling'
+                              ? sib.via
+                                ? `Half · via ${sib.via}`
+                                : 'Half-sibling'
+                              : undefined
+                          }
+                          onOpen={() => onNavigateToNode(sib.nodeId)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Children */}
+                {grouped.children.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">Children</h4>
+                    <ul className="space-y-1">
+                      {grouped.children.map((child) => (
+                        <PersonRow
+                          key={child.id}
+                          name={formatDisplayName(child.firstName, child.lastName)}
+                          onOpen={() => onNavigateToNode(child.id)}
+                          onRemove={
+                            isAdmin
+                              ? () => {
                                   // Child relationship: this person is father or mother of the child
                                   const relId = relationships.find(
                                     (r) =>
@@ -718,122 +817,60 @@ export default function SidePanel({
                                       r.toNodeId === child.id
                                   )?.id;
                                   if (relId) handleDeleteRelationship(relId);
-                                }}
-                                disabled={deletingRelId !== null}
-                                className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-                                aria-label={`Delete relationship with ${child.firstName}`}
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-
-                  {/* Spouses */}
-                  {grouped.spouses.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
-                        Spouses
-                      </h4>
-                      <ul className="space-y-1">
-                        {grouped.spouses.map(({ node: spouse, status }) => (
-                          <li key={spouse.id} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => onNavigateToNode(spouse.id)}
-                                className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none focus:underline"
-                              >
-                                {formatDisplayName(spouse.firstName, spouse.lastName)}
-                              </button>
-                              {status && status !== 'active' && (
-                                <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded capitalize">
-                                  {status}
-                                </span>
-                              )}
-                            </div>
-                            {isAdmin && (
-                              <button
-                                onClick={() => {
-                                  const relId = getRelationshipId(spouse.id, 'spouse');
-                                  if (relId) handleDeleteRelationship(relId);
-                                }}
-                                disabled={deletingRelId !== null}
-                                className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-                                aria-label={`Delete relationship with ${spouse.firstName}`}
-                              >
-                                ✕
-                              </button>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              )}
+                                }
+                              : undefined
+                          }
+                          removeLabel={`Delete relationship with ${child.firstName}`}
+                          removeDisabled={deletingRelId !== null}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Derived Relationships */}
+            {/* Extended family (derived), grouped by relationship */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
                 Extended Family
               </h3>
 
-              {derived.length === 0 ? (
+              {extendedGroups.length === 0 ? (
                 <p className="text-sm text-gray-500 italic">
                   No extended family connections found.
                 </p>
               ) : (
-                <ul className="space-y-2">
-                  {derived.map((rel) => (
-                    <li key={rel.nodeId} className="flex items-center justify-between">
-                      <button
-                        onClick={() => onNavigateToNode(rel.nodeId)}
-                        className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none focus:underline"
-                      >
-                        {rel.personName}
-                      </button>
-                      <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
-                        {getRelationshipTypeLabel(rel.type)}
-                      </span>
-                    </li>
+                <div className="space-y-4">
+                  {extendedGroups.map((group) => (
+                    <div key={group.type}>
+                      <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
+                        {group.label}
+                      </h4>
+                      <ul className="space-y-1">
+                        {group.people.map((rel) => (
+                          <PersonRow
+                            key={rel.nodeId}
+                            name={rel.personName}
+                            onOpen={() => onNavigateToNode(rel.nodeId)}
+                          />
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
 
             {/* Admin: Add Relationship */}
             {isAdmin && (
               <div className="border-t border-gray-200 pt-4 space-y-3">
-                {/* Quick-add buttons */}
-                {!showAddRelationship && !quickAdd && (
+                {/* Quick-add buttons (parents are added from their slots above) */}
+                {!showAddRelationship && quickAdd !== 'child' && quickAdd !== 'spouse' && (
                   <div className="grid grid-cols-2 gap-2">
-                    {!grouped.father && (
-                      <button
-                        onClick={() => {
-                          setQuickAdd({ type: 'father', direction: 'new_is_parent' });
-                        }}
-                        className="rounded-md border border-gray-200 bg-gray-50 px-2 py-2 text-xs font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-colors"
-                      >
-                        + Father
-                      </button>
-                    )}
-                    {!grouped.mother && (
-                      <button
-                        onClick={() => {
-                          setQuickAdd({ type: 'mother', direction: 'new_is_parent' });
-                        }}
-                        className="rounded-md border border-gray-200 bg-gray-50 px-2 py-2 text-xs font-medium text-gray-700 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-200 transition-colors"
-                      >
-                        + Mother
-                      </button>
-                    )}
                     <button
                       onClick={() => {
-                        setQuickAdd({ type: 'father', direction: 'new_is_child' });
+                        setQuickAdd('child');
                       }}
                       className="rounded-md border border-gray-200 bg-gray-50 px-2 py-2 text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-colors"
                     >
@@ -841,7 +878,7 @@ export default function SidePanel({
                     </button>
                     <button
                       onClick={() => {
-                        setQuickAdd({ type: 'spouse', direction: undefined });
+                        setQuickAdd('spouse');
                       }}
                       className="rounded-md border border-gray-200 bg-gray-50 px-2 py-2 text-xs font-medium text-gray-700 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-200 transition-colors"
                     >
@@ -850,31 +887,8 @@ export default function SidePanel({
                   </div>
                 )}
 
-                {/* Quick-add form (inline person creation with pre-filled relationship) */}
-                {quickAdd && (
-                  <div className="rounded-lg border border-indigo-100 bg-indigo-50/30 p-3">
-                    <AddPersonFormInline
-                      treeId={treeId}
-                      role="admin"
-                      allNodes={allNodes}
-                      prefillRelationship={{
-                        type: quickAdd.type,
-                        targetNodeId: node.id,
-                        direction: quickAdd.direction,
-                      }}
-                      onPersonCreated={(newNode) => {
-                        onRelationshipCreated({
-                          id: 'refresh',
-                          fromNodeId: '',
-                          toNodeId: '',
-                          type: quickAdd!.type,
-                        });
-                        setQuickAdd(null);
-                      }}
-                      onCancel={() => setQuickAdd(null)}
-                    />
-                  </div>
-                )}
+                {/* Quick-add form for child / spouse */}
+                {(quickAdd === 'child' || quickAdd === 'spouse') && quickAddForm}
 
                 {/* Link existing person */}
                 {!quickAdd && (

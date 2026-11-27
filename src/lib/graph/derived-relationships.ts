@@ -13,6 +13,8 @@ export interface DerivedRelationship {
   nodeId: string;
   personName: string;
   type: DerivedRelationType;
+  /** For half-siblings: the name of the parent they share with the person */
+  via?: string;
 }
 
 /**
@@ -48,7 +50,7 @@ export function deriveRelationships(
   const seen = new Set<string>();
   const results: DerivedRelationship[] = [];
 
-  function addResult(nodeId: string, type: DerivedRelationType): void {
+  function addResult(nodeId: string, type: DerivedRelationType, via?: string): void {
     // Don't add the person themselves or duplicates
     if (nodeId === personNodeId || seen.has(nodeId)) return;
     const node = nodeMap.get(nodeId);
@@ -58,6 +60,7 @@ export function deriveRelationships(
       nodeId,
       personName: formatDisplayName(node.firstName, node.lastName),
       type,
+      ...(via ? { via } : {}),
     });
   }
 
@@ -66,23 +69,28 @@ export function deriveRelationships(
 
   if (parents.length > 0) {
     // Find all children of each parent (excluding the person)
-    const siblingParentCount = new Map<string, number>();
+    const siblingSharedParents = new Map<string, string[]>();
 
     for (const parentId of parents) {
       const children = getChildren(parentId);
       for (const childId of children) {
         if (childId === personNodeId) continue;
-        siblingParentCount.set(childId, (siblingParentCount.get(childId) || 0) + 1);
+        siblingSharedParents.set(childId, [...(siblingSharedParents.get(childId) ?? []), parentId]);
       }
     }
 
-    for (const [siblingId, sharedParents] of siblingParentCount) {
-      if (sharedParents === parents.length && parents.length > 0) {
+    for (const [siblingId, shared] of siblingSharedParents) {
+      if (shared.length === parents.length && parents.length > 0) {
         // Full sibling: shares ALL of the person's parents
         addResult(siblingId, 'sibling');
       } else {
         // Half-sibling: shares at least one but not all parents
-        addResult(siblingId, 'half-sibling');
+        const viaNode = nodeMap.get(shared[0]);
+        addResult(
+          siblingId,
+          'half-sibling',
+          viaNode ? formatDisplayName(viaNode.firstName, viaNode.lastName) : undefined
+        );
       }
     }
   }

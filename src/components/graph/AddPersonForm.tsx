@@ -16,6 +16,11 @@ export interface AddPersonFormProps {
     targetNodeId: string;
     direction?: 'new_is_parent' | 'new_is_child';
   };
+  /**
+   * When adding a new child, the target's spouse who can also be linked as the
+   * child's other parent. Shown as a checkbox (on by default).
+   */
+  coParent?: { nodeId: string; type: 'father' | 'mother'; label: string };
   onPersonCreated: (node: GraphNodeData) => void;
   onCancel?: () => void;
 }
@@ -63,9 +68,11 @@ export default function AddPersonForm({
   role,
   allNodes = [],
   prefillRelationship,
+  coParent,
   onPersonCreated,
   onCancel,
 }: AddPersonFormProps) {
+  const [linkCoParent, setLinkCoParent] = useState(true);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
@@ -184,6 +191,20 @@ export default function AddPersonForm({
         if (!relRes.ok) {
           // Person was created but relationship failed — still notify success
           setSuccessMessage(`${firstName.trim()} added, but relationship could not be created automatically.`);
+        }
+      }
+
+      // Step 3: Also link the other parent (target's spouse) if requested
+      if (coParent && linkCoParent && relDirection === 'new_is_child') {
+        const coRes = await fetch(`/api/trees/${treeId}/relationships`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fromNodeId: coParent.nodeId, toNodeId: newNode.id, type: coParent.type }),
+        });
+        if (!coRes.ok) {
+          setSuccessMessage(
+            `${firstName.trim()} added, but could not be linked to ${coParent.label} automatically.`
+          );
         }
       }
 
@@ -413,6 +434,20 @@ export default function AddPersonForm({
               : 'selected person'}
           </span>
         </div>
+      )}
+
+      {/* Also link the other parent */}
+      {coParent && relDirection === 'new_is_child' && (
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={linkCoParent}
+            onChange={(e) => setLinkCoParent(e.target.checked)}
+            disabled={isSubmitting}
+            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+          />
+          Also add as child of <span className="font-medium">{coParent.label}</span>
+        </label>
       )}
 
       {/* Actions */}

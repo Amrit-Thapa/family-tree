@@ -78,6 +78,8 @@ describe('deriveRelationships', () => {
     const halfSiblings = result.filter((r) => r.type === 'half-sibling');
     expect(halfSiblings).toHaveLength(1);
     expect(halfSiblings[0].nodeId).toBe('half');
+    // Names the parent they share
+    expect(halfSiblings[0].via).toBe('Dad');
   });
 
   it('computes grandparents (2 hops up)', () => {

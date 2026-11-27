@@ -13,8 +13,15 @@ export interface LayoutResult {
   edges: Edge[];
 }
 
+/**
+ * Fixed rendered height of a PersonNode card (tall enough for the "You" badge).
+ * PersonNode applies this height, so the layout and the DOM always agree and
+ * side handles — and the spouse lines between them — stay level.
+ */
+export const PERSON_NODE_HEIGHT = 122;
+
 const DEFAULT_NODE_WIDTH = 180;
-const DEFAULT_NODE_HEIGHT = 90;
+const DEFAULT_NODE_HEIGHT = PERSON_NODE_HEIGHT;
 const JUNCTION_SIZE = 2;
 
 interface CoupleData {
@@ -122,15 +129,90 @@ function detectCouples(edges: Edge[]): CoupleData[] {
   return couples;
 }
 
+interface SpouseGroup {
+  id: string;
+  /** Members in left-to-right (TB) / top-to-bottom (LR) order */
+  members: string[];
+}
+
+/**
+ * Groups people connected by spouse / co-parent links into "spouse groups".
+ * Each group is laid out by dagre as a single composite node, which guarantees
+ * that partners share a generation row and sit next to each other.
+ *
+ * Members are ordered by walking the spouse chain from an end, so a person
+ * with two partners ends up between them (ex — person — spouse).
+ */
+function buildSpouseGroups(nodes: Node[], couples: CoupleData[]): SpouseGroup[] {
+  const nodeIds = new Set(nodes.map((n) => n.id));
+  const adjacency = new Map<string, string[]>();
+  for (const c of couples) {
+    if (!nodeIds.has(c.spouse1) || !nodeIds.has(c.spouse2)) continue;
+    if (!adjacency.has(c.spouse1)) adjacency.set(c.spouse1, []);
+    if (!adjacency.has(c.spouse2)) adjacency.set(c.spouse2, []);
+    adjacency.get(c.spouse1)!.push(c.spouse2);
+    adjacency.get(c.spouse2)!.push(c.spouse1);
+  }
+
+  const groups: SpouseGroup[] = [];
+  const assigned = new Set<string>();
+
+  // Iterate in input order so the result is deterministic
+  for (const node of nodes) {
+    if (assigned.has(node.id) || !adjacency.has(node.id)) continue;
+
+    // Collect the connected component
+    const component: string[] = [];
+    const stack = [node.id];
+    const inComponent = new Set([node.id]);
+    while (stack.length) {
+      const cur = stack.pop()!;
+      component.push(cur);
+      for (const next of adjacency.get(cur)!) {
+        if (!inComponent.has(next)) {
+          inComponent.add(next);
+          stack.push(next);
+        }
+      }
+    }
+
+    // Order: walk the chain starting from a lowest-degree member
+    const order = nodes.map((n) => n.id).filter((id) => inComponent.has(id));
+    const degree = (id: string) => adjacency.get(id)!.length;
+    const ordered: string[] = [];
+    const visited = new Set<string>();
+    while (ordered.length < order.length) {
+      let cur: string | undefined = order
+        .filter((id) => !visited.has(id))
+        .sort((a, b) => degree(a) - degree(b))[0];
+      while (cur) {
+        visited.add(cur);
+        ordered.push(cur);
+        cur = adjacency.get(cur)!.find((n) => !visited.has(n));
+      }
+    }
+
+    ordered.forEach((id) => assigned.add(id));
+    groups.push({ id: `_grp_${groups.length}`, members: ordered });
+  }
+
+  return groups;
+}
+
+/** Gap between partners inside a spouse group (room for the dashed spouse line) */
+const SPOUSE_GAP = 60;
+
 /**
  * Computes a family-tree-aware dagre layout.
  *
  * Strategy:
- * 1. For each couple with shared children, insert a junction node
- * 2. Route parent→child edges through the junction
- * 3. Constrain spouses to the same rank using dagre's rank constraints
- * 4. After layout, force-align spouse Y positions
- * 5. Build clean visual edges (spouse=horizontal dashed, parent-child=smoothstep)
+ * 1. Collapse each spouse group (partners / co-parents) into one composite
+ *    dagre node so partners always share a row and sit side by side
+ * 2. For each couple with children, insert a junction node and route
+ *    parent→child edges through it
+ * 3. After layout, expand each composite into its members and centre each
+ *    junction under its couple
+ * 4. Build clean visual edges (spouse=horizontal dashed, parent-child=smoothstep)
  */
 export function computeDagreLayout(
   nodes: Node[],
@@ -138,19 +220,58 @@ export function computeDagreLayout(
   options?: LayoutOptions
 ): LayoutResult {
   const { rankdir = 'TB', nodesep = 100, ranksep = 100 } = options ?? {};
+  const horizontal = rankdir === 'TB';
 
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({ rankdir, nodesep, ranksep });
 
-  // Add real nodes
+  const sizeOf = new Map<string, { w: number; h: number }>();
   for (const node of nodes) {
-    const w = node.measured?.width ?? node.width ?? DEFAULT_NODE_WIDTH;
-    const h = node.measured?.height ?? node.height ?? DEFAULT_NODE_HEIGHT;
-    g.setNode(node.id, { width: w, height: h });
+    sizeOf.set(node.id, {
+      w: node.measured?.width ?? node.width ?? DEFAULT_NODE_WIDTH,
+      h: node.measured?.height ?? node.height ?? DEFAULT_NODE_HEIGHT,
+    });
   }
 
   const couples = detectCouples(edges);
+  const groups = buildSpouseGroups(nodes, couples);
+
+  // Map each person to the dagre node that represents them
+  const repOf = new Map<string, string>();
+  for (const node of nodes) repOf.set(node.id, node.id);
+  for (const group of groups) {
+    for (const m of group.members) repOf.set(m, group.id);
+  }
+  const rep = (id: string) => repOf.get(id) ?? id;
+
+  // Add standalone people
+  for (const node of nodes) {
+    if (rep(node.id) !== node.id) continue;
+    const { w, h } = sizeOf.get(node.id)!;
+    g.setNode(node.id, { width: w, height: h });
+  }
+
+  // Add spouse groups as composite nodes laid side by side across the rank
+  for (const group of groups) {
+    const sizes = group.members.map((m) => sizeOf.get(m)!);
+    const gaps = SPOUSE_GAP * (sizes.length - 1);
+    const width = horizontal
+      ? sizes.reduce((s, x) => s + x.w, 0) + gaps
+      : Math.max(...sizes.map((x) => x.w));
+    const height = horizontal
+      ? Math.max(...sizes.map((x) => x.h))
+      : sizes.reduce((s, x) => s + x.h, 0) + gaps;
+    g.setNode(group.id, { width, height });
+  }
+
+  const addEdge = (from: string, to: string) => {
+    const a = rep(from);
+    const b = rep(to);
+    if (a === b) return; // never add self-loops on a composite
+    g.setEdge(a, b, { minlen: 1 });
+  };
+
   const reroutedKeys = new Set<string>();
 
   // For each couple with children, add junction and reroute
@@ -160,38 +281,15 @@ export function computeDagreLayout(
     g.setNode(couple.junctionId, { width: JUNCTION_SIZE, height: JUNCTION_SIZE });
 
     // Parents → junction
-    g.setEdge(couple.spouse1, couple.junctionId, { minlen: 1 });
-    g.setEdge(couple.spouse2, couple.junctionId, { minlen: 1 });
+    addEdge(couple.spouse1, couple.junctionId);
+    addEdge(couple.spouse2, couple.junctionId);
 
     // Junction → children
     for (const child of couple.sharedChildren) {
-      g.setEdge(couple.junctionId, child, { minlen: 1 });
+      addEdge(couple.junctionId, child);
       // Suppress direct edges from EITHER parent to this child
       reroutedKeys.add(`${couple.spouse1}|${child}`);
       reroutedKeys.add(`${couple.spouse2}|${child}`);
-    }
-  }
-
-  // For spouse pairs WITHOUT children, anchor the floating spouse
-  for (const couple of couples) {
-    if (couple.sharedChildren.length > 0) continue;
-
-    // Find if either spouse is part of ANOTHER couple that HAS a junction
-    const s1Junction = couples.find(
-      (c) => c.sharedChildren.length > 0 &&
-        (c.spouse1 === couple.spouse1 || c.spouse2 === couple.spouse1)
-    );
-    const s2Junction = couples.find(
-      (c) => c.sharedChildren.length > 0 &&
-        (c.spouse1 === couple.spouse2 || c.spouse2 === couple.spouse2)
-    );
-
-    if (s1Junction && !s2Junction) {
-      // spouse2 is floating — connect to spouse1's junction
-      g.setEdge(couple.spouse2, s1Junction.junctionId, { minlen: 1 });
-    } else if (s2Junction && !s1Junction) {
-      // spouse1 is floating — connect to spouse2's junction
-      g.setEdge(couple.spouse1, s2Junction.junctionId, { minlen: 1 });
     }
   }
 
@@ -199,63 +297,68 @@ export function computeDagreLayout(
   for (const edge of edges) {
     if (edge.data?.isSpouse) continue;
     if (!reroutedKeys.has(`${edge.source}|${edge.target}`)) {
-      g.setEdge(edge.source, edge.target, { minlen: 1 });
+      addEdge(edge.source, edge.target);
     }
   }
 
   dagre.layout(g);
 
-  // Build layouted real nodes
-  const layoutedNodes: Node[] = nodes.map((node) => {
+  // Resolve centre points for every person (expanding composites)
+  const centerOf = new Map<string, { x: number; y: number }>();
+  for (const node of nodes) {
+    if (rep(node.id) !== node.id) continue;
     const dn = g.node(node.id);
-    const w = node.measured?.width ?? node.width ?? DEFAULT_NODE_WIDTH;
-    const h = node.measured?.height ?? node.height ?? DEFAULT_NODE_HEIGHT;
-    return {
-      ...node,
-      position: { x: dn.x - w / 2, y: dn.y - h / 2 },
-    };
-  });
-
-  // Add junction nodes (invisible)
-  for (const couple of couples) {
-    if (couple.sharedChildren.length === 0) continue;
-    const dn = g.node(couple.junctionId);
-    if (dn) {
-      layoutedNodes.push({
-        id: couple.junctionId,
-        type: 'junction',
-        position: { x: dn.x - JUNCTION_SIZE / 2, y: dn.y - JUNCTION_SIZE / 2 },
-        data: {},
-        width: JUNCTION_SIZE,
-        height: JUNCTION_SIZE,
-      });
+    centerOf.set(node.id, { x: dn.x, y: dn.y });
+  }
+  for (const group of groups) {
+    const dn = g.node(group.id);
+    // Start at the composite's leading edge and place members along it.
+    // Members share the composite's centre line so the side handles (and the
+    // dashed spouse line between them) stay level even if card heights differ.
+    let cursor = horizontal ? dn.x - dn.width / 2 : dn.y - dn.height / 2;
+    for (const m of group.members) {
+      const { w, h } = sizeOf.get(m)!;
+      if (horizontal) {
+        centerOf.set(m, { x: cursor + w / 2, y: dn.y });
+        cursor += w + SPOUSE_GAP;
+      } else {
+        centerOf.set(m, { x: dn.x, y: cursor + h / 2 });
+        cursor += h + SPOUSE_GAP;
+      }
     }
   }
 
-  // Force-align all spouse pairs to the same Y level
+  // Build layouted real nodes
+  const layoutedNodes: Node[] = nodes.map((node) => {
+    const c = centerOf.get(node.id)!;
+    const { w, h } = sizeOf.get(node.id)!;
+    return {
+      ...node,
+      position: { x: c.x - w / 2, y: c.y - h / 2 },
+    };
+  });
+
+  // Add junction nodes (invisible), centred between the couple across the rank
   for (const couple of couples) {
-    const n1 = layoutedNodes.find((n) => n.id === couple.spouse1);
-    const n2 = layoutedNodes.find((n) => n.id === couple.spouse2);
-    if (n1 && n2) {
-      const minY = Math.min(n1.position.y, n2.position.y);
-      n1.position.y = minY;
-      n2.position.y = minY;
-
-      // Ensure they don't overlap horizontally — if they're at the same X, push apart
-      const n1Right = n1.position.x + (n1.width ?? DEFAULT_NODE_WIDTH);
-      const n2Left = n2.position.x;
-      const n1Left = n1.position.x;
-      const n2Right = n2.position.x + (n2.width ?? DEFAULT_NODE_WIDTH);
-
-      // Check if n1 overlaps n2
-      if (n1Right > n2Left && n1Left < n2Right) {
-        // They overlap — push them apart from their midpoint
-        const midX = (n1.position.x + n2.position.x) / 2;
-        const halfWidth = (DEFAULT_NODE_WIDTH + nodesep) / 2;
-        n1.position.x = midX - halfWidth;
-        n2.position.x = midX + halfWidth;
-      }
+    if (couple.sharedChildren.length === 0) continue;
+    const dn = g.node(couple.junctionId);
+    if (!dn) continue;
+    const c1 = centerOf.get(couple.spouse1);
+    const c2 = centerOf.get(couple.spouse2);
+    let jx = dn.x;
+    let jy = dn.y;
+    if (c1 && c2) {
+      if (horizontal) jx = (c1.x + c2.x) / 2;
+      else jy = (c1.y + c2.y) / 2;
     }
+    layoutedNodes.push({
+      id: couple.junctionId,
+      type: 'junction',
+      position: { x: jx - JUNCTION_SIZE / 2, y: jy - JUNCTION_SIZE / 2 },
+      data: {},
+      width: JUNCTION_SIZE,
+      height: JUNCTION_SIZE,
+    });
   }
 
   // Build final visual edges

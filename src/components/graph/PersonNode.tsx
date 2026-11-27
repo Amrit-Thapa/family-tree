@@ -3,6 +3,7 @@
 import { memo } from 'react';
 import { Handle, Position, type NodeProps } from '@xyflow/react';
 import { formatDisplayName } from '@/lib/graph/format-name';
+import { PERSON_NODE_HEIGHT } from '@/lib/graph/layout';
 
 /**
  * Data shape for a person node in the family tree graph.
@@ -71,10 +72,11 @@ function PersonNodeComponent({ data }: NodeProps) {
         className="w-3! h-3! bg-gray-300! border-2! border-white! -left-1.5! opacity-0!"
       />
 
-      {/* Card */}
+      {/* Card — fixed height so every card matches the layout's assumption */}
       <div
+        style={{ height: PERSON_NODE_HEIGHT }}
         className={`
-          flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl
+          flex flex-col items-center justify-center gap-1.5 px-4 py-3 rounded-xl
           bg-white shadow-lg border-2 transition-shadow
           min-w-[140px] max-w-[180px]
           hover:shadow-xl

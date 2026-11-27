@@ -174,6 +174,62 @@ describe('computeDagreLayout', () => {
     expect(coparentEdge!.style).toHaveProperty('strokeDasharray');
   });
 
+  it('keeps a childless spouse with no parents on their partner\'s generation, next to them', () => {
+    // Regression: Anisha (no parents) married Amrit (child of Harka + Jau Maya).
+    // Previously Amrit was dragged up to the grandparents' row and the spouse
+    // line ran behind unrelated nodes.
+    const ids = ['jit', 'sukMaya', 'harka', 'jauMaya', 'amrit', 'anisha', 'arjun', 'parta'];
+    const nodes: Node[] = ids.map((id) => ({ id, position: { x: 0, y: 0 }, data: {} }));
+    const edges: Edge[] = [
+      { id: 's1', source: 'jit', target: 'sukMaya', data: { isSpouse: true } },
+      { id: 's2', source: 'harka', target: 'jauMaya', data: { isSpouse: true } },
+      { id: 's3', source: 'amrit', target: 'anisha', data: { isSpouse: true } },
+      { id: 'p1', source: 'jit', target: 'harka', data: { isSpouse: false } },
+      { id: 'p2', source: 'sukMaya', target: 'harka', data: { isSpouse: false } },
+      { id: 'p3', source: 'jit', target: 'parta', data: { isSpouse: false } },
+      { id: 'p4', source: 'harka', target: 'amrit', data: { isSpouse: false } },
+      { id: 'p5', source: 'jauMaya', target: 'amrit', data: { isSpouse: false } },
+      { id: 'p6', source: 'harka', target: 'arjun', data: { isSpouse: false } },
+      { id: 'p7', source: 'jauMaya', target: 'arjun', data: { isSpouse: false } },
+    ];
+
+    const result = computeDagreLayout(nodes, edges);
+    const pos = (id: string) => result.nodes.find((n) => n.id === id)!.position;
+
+    // Amrit stays in the grandchildren row with his sibling, below his parents
+    expect(pos('amrit').y).toBe(pos('arjun').y);
+    expect(pos('amrit').y).toBeGreaterThan(pos('harka').y);
+    // Anisha joins Amrit's row rather than pulling him up
+    expect(pos('anisha').y).toBe(pos('amrit').y);
+
+    // Every couple is adjacent: no other person sits between them on their row
+    const people = result.nodes.filter((n) => n.type !== 'junction');
+    for (const [a, b] of [['jit', 'sukMaya'], ['harka', 'jauMaya'], ['amrit', 'anisha']]) {
+      const [lo, hi] = [pos(a).x, pos(b).x].sort((x, y) => x - y);
+      const between = people.filter(
+        (n) => n.position.y === pos(a).y && n.position.x > lo && n.position.x < hi
+      );
+      expect(between.map((n) => n.id)).toEqual([]);
+    }
+  });
+
+  it('places a person with two partners between them', () => {
+    const nodes: Node[] = ['ex', 'person', 'spouse'].map((id) => ({
+      id,
+      position: { x: 0, y: 0 },
+      data: {},
+    }));
+    const edges: Edge[] = [
+      { id: 's1', source: 'person', target: 'ex', data: { isSpouse: true, spouseStatus: 'divorced' } },
+      { id: 's2', source: 'person', target: 'spouse', data: { isSpouse: true } },
+    ];
+    const result = computeDagreLayout(nodes, edges);
+    const x = (id: string) => result.nodes.find((n) => n.id === id)!.position.x;
+    const xs = [x('ex'), x('person'), x('spouse')];
+    expect(Math.min(...xs)).toBeLessThan(x('person'));
+    expect(Math.max(...xs)).toBeGreaterThan(x('person'));
+  });
+
   it('does not duplicate couple detection when both spouse edge and shared children exist', () => {
     // Harka and Jau Maya are spouses AND share children
     const nodes: Node[] = [

@@ -10,7 +10,7 @@ import { TREE_NAME_MAX, TREE_DESCRIPTION_MAX } from '@/lib/validations/tree';
 const DASHBOARD_PATH = '/dashboard';
 
 const INPUT_CLASSES =
-  'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm';
+  'mt-1 block w-full rounded-xl border border-stone-300 px-3 py-2 text-stone-900 placeholder-stone-400 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:text-sm';
 
 // --- Reusable field error component ---
 
@@ -29,7 +29,7 @@ function FieldError({ state, field }: { state: ActionState | null; field: FormFi
 
 function CharacterCounter({ current, max }: { current: number; max: number }) {
   return (
-    <span className="text-xs text-gray-400">
+    <span className="text-xs text-stone-400">
       {current}/{max}
     </span>
   );
@@ -50,17 +50,17 @@ export default function NewTreePage() {
       <div className="mb-6">
         <Link
           href={DASHBOARD_PATH}
-          className="text-sm text-indigo-600 hover:text-indigo-500"
+          className="text-sm text-brand-600 hover:text-brand-500"
         >
           &larr; Back to Dashboard
         </Link>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900">
+      <div className="rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+        <h1 className="text-2xl font-bold text-stone-900">
           Create a New Family Tree
         </h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-stone-600">
           Give your family tree a name and an optional description to get started.
         </p>
 
@@ -68,7 +68,7 @@ export default function NewTreePage() {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-stone-700"
             >
               Tree Name <span className="text-red-500">*</span>
             </label>
@@ -84,7 +84,7 @@ export default function NewTreePage() {
               aria-describedby="name-hint"
               aria-invalid={state?.error?.field === 'name' ? 'true' : undefined}
             />
-            <p id="name-hint" className="mt-1 text-xs text-gray-500">
+            <p id="name-hint" className="mt-1 text-xs text-stone-500">
               1–{TREE_NAME_MAX} characters. Must not be empty after trimming.
             </p>
             <FieldError state={state} field="name" />
@@ -93,7 +93,7 @@ export default function NewTreePage() {
           <div>
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-stone-700"
             >
               Description
             </label>
@@ -110,7 +110,7 @@ export default function NewTreePage() {
               onChange={(e) => setDescriptionLength(e.target.value.length)}
             />
             <div className="mt-1 flex items-center justify-between">
-              <p id="description-hint" className="text-xs text-gray-500">
+              <p id="description-hint" className="text-xs text-stone-500">
                 Up to {TREE_DESCRIPTION_MAX} characters.
               </p>
               <CharacterCounter current={descriptionLength} max={TREE_DESCRIPTION_MAX} />
@@ -122,7 +122,7 @@ export default function NewTreePage() {
             <div
               role="alert"
               aria-live="polite"
-              className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
             >
               {state.error.message}
             </div>
@@ -132,14 +132,14 @@ export default function NewTreePage() {
             {isPending ? (
               <span
                 aria-disabled="true"
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm opacity-60 cursor-default"
+                className="rounded-xl border border-stone-300 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm opacity-60 cursor-default"
               >
                 Cancel
               </span>
             ) : (
               <Link
                 href={DASHBOARD_PATH}
-                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
               >
                 Cancel
               </Link>
@@ -147,7 +147,7 @@ export default function NewTreePage() {
             <button
               type="submit"
               disabled={isPending}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
             >
               {isPending ? 'Creating...' : 'Create Tree'}
             </button>

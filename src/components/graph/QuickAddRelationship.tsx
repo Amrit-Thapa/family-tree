@@ -29,7 +29,7 @@ const KIND_LABEL: Record<QuickAddKind, string> = {
 };
 
 const SELECT_CLASSES =
-  'mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500';
+  'mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500';
 
 /**
  * Inline form behind the side panel's "+ Father / + Mother / + Child / + Spouse"
@@ -116,7 +116,7 @@ export default function QuickAddRelationship({
   const parentTypeSelector =
     kind === 'child' && !inferredParentType ? (
       <div>
-        <label htmlFor="quick-add-parent-type" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="quick-add-parent-type" className="block text-sm font-medium text-stone-700">
           {personName} is the child&apos;s
         </label>
         <select
@@ -137,12 +137,12 @@ export default function QuickAddRelationship({
 
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-gray-900">
+      <h3 className="text-sm font-semibold text-stone-900">
         Add {KIND_LABEL[kind].toLowerCase()} of {personName}
       </h3>
 
       {/* Mode switch */}
-      <div role="tablist" className="grid grid-cols-2 gap-1 rounded-md bg-gray-100 p-1 text-xs font-medium">
+      <div role="tablist" className="grid grid-cols-2 gap-1 rounded-xl bg-stone-100 p-1 text-xs font-medium">
         {(['existing', 'new'] as const).map((m) => (
           <button
             key={m}
@@ -154,7 +154,7 @@ export default function QuickAddRelationship({
               setError(null);
             }}
             className={`rounded px-2 py-1.5 transition-colors ${
-              mode === m ? 'bg-white text-indigo-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              mode === m ? 'bg-white text-brand-700 shadow-sm' : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             {m === 'existing' ? 'Someone in the tree' : 'New person'}
@@ -167,19 +167,19 @@ export default function QuickAddRelationship({
           {parentTypeSelector}
 
           {error && (
-            <div role="alert" className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div role="alert" className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
             </div>
           )}
 
           {candidates.length === 0 ? (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-stone-500">
               No one in the tree can be added as {personName}&apos;s {KIND_LABEL[kind].toLowerCase()}.
               Use &ldquo;New person&rdquo; instead.
             </p>
           ) : (
             <div>
-              <label htmlFor="quick-add-existing" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="quick-add-existing" className="block text-sm font-medium text-stone-700">
                 Person
               </label>
               <select
@@ -209,7 +209,7 @@ export default function QuickAddRelationship({
                   </optgroup>
                 )}
               </select>
-              {selectedReason && <p className="mt-1 text-xs text-indigo-600">{selectedReason}</p>}
+              {selectedReason && <p className="mt-1 text-xs text-brand-600">{selectedReason}</p>}
             </div>
           )}
 
@@ -217,7 +217,7 @@ export default function QuickAddRelationship({
             <button
               type="submit"
               disabled={isSubmitting || !selectedId}
-              className="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="flex-1 rounded-full bg-brand-500 px-3 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
             >
               {isSubmitting ? 'Linking…' : `Link as ${KIND_LABEL[kind].toLowerCase()}`}
             </button>
@@ -225,7 +225,7 @@ export default function QuickAddRelationship({
               type="button"
               onClick={onCancel}
               disabled={isSubmitting}
-              className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+              className="flex-1 rounded-full border border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-60"
             >
               Cancel
             </button>

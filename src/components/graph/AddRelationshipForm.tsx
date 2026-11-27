@@ -108,13 +108,13 @@ export default function AddRelationshipForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-900">Link Existing Person</h3>
+      <h3 className="text-sm font-semibold text-stone-900">Link Existing Person</h3>
 
       {error && (
         <div
           role="alert"
           aria-live="polite"
-          className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+          className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-700"
         >
           {error}
         </div>
@@ -124,7 +124,7 @@ export default function AddRelationshipForm({
       <div>
         <label
           htmlFor="target-person"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-stone-700"
         >
           Person
         </label>
@@ -132,7 +132,7 @@ export default function AddRelationshipForm({
           id="target-person"
           value={targetNodeId}
           onChange={(e) => setTargetNodeId(e.target.value)}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           disabled={isSubmitting}
         >
           <option value="">Select a person</option>
@@ -149,7 +149,7 @@ export default function AddRelationshipForm({
       <div>
         <label
           htmlFor="relationship-type"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-stone-700"
         >
           Relationship Type
         </label>
@@ -157,7 +157,7 @@ export default function AddRelationshipForm({
           id="relationship-type"
           value={type}
           onChange={(e) => setType(e.target.value as RelationshipType)}
-          className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
           disabled={isSubmitting}
         >
           <option value="father">Father</option>
@@ -169,11 +169,11 @@ export default function AddRelationshipForm({
       {/* Direction selector (only for father/mother) */}
       {(type === 'father' || type === 'mother') && (
         <fieldset>
-          <legend className="block text-sm font-medium text-gray-700">
+          <legend className="block text-sm font-medium text-stone-700">
             Direction
           </legend>
           <div className="mt-2 space-y-2">
-            <label className="flex items-center gap-2 text-sm text-gray-700">
+            <label className="flex items-center gap-2 text-sm text-stone-700">
               <input
                 type="radio"
                 name="direction"
@@ -181,11 +181,11 @@ export default function AddRelationshipForm({
                 checked={direction === 'current_is_parent'}
                 onChange={() => setDirection('current_is_parent')}
                 disabled={isSubmitting}
-                className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 border-stone-300 text-brand-600 focus:ring-brand-500"
               />
               Current person is the {type}
             </label>
-            <label className="flex items-center gap-2 text-sm text-gray-700">
+            <label className="flex items-center gap-2 text-sm text-stone-700">
               <input
                 type="radio"
                 name="direction"
@@ -193,7 +193,7 @@ export default function AddRelationshipForm({
                 checked={direction === 'current_is_child'}
                 onChange={() => setDirection('current_is_child')}
                 disabled={isSubmitting}
-                className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                className="h-4 w-4 border-stone-300 text-brand-600 focus:ring-brand-500"
               />
               Selected person is the {type}
             </label>
@@ -206,7 +206,7 @@ export default function AddRelationshipForm({
         <button
           type="submit"
           disabled={isSubmitting || !targetNodeId}
-          className="flex-1 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex-1 rounded-full bg-brand-500 px-3 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
         >
           {isSubmitting ? 'Adding...' : 'Add Relationship'}
         </button>
@@ -214,7 +214,7 @@ export default function AddRelationshipForm({
           type="button"
           onClick={onClose}
           disabled={isSubmitting}
-          className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+          className="flex-1 rounded-full border border-stone-300 bg-white px-3 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-60"
         >
           Cancel
         </button>

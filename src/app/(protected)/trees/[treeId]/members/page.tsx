@@ -40,14 +40,14 @@ interface ActiveInvite {
 // --- Constants ---
 
 const INPUT_CLASSES =
-  'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm';
+  'mt-1 block w-full rounded-xl border border-stone-300 px-3 py-2 text-stone-900 placeholder-stone-400 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:text-sm';
 
 const ROLE_OPTIONS: MembershipRole[] = ['admin', 'editor', 'viewer'];
 
 const ROLE_BADGE_COLORS: Record<MembershipRole, string> = {
-  admin: 'bg-purple-100 text-purple-800',
-  editor: 'bg-blue-100 text-blue-800',
-  viewer: 'bg-gray-100 text-gray-800',
+  admin: 'bg-sun-100 text-amber-800',
+  editor: 'bg-leaf-100 text-leaf-700',
+  viewer: 'bg-stone-100 text-stone-800',
 };
 
 // --- Role Badge Component ---
@@ -80,19 +80,19 @@ function MemberRow({
   const isCurrentUser = member.id === currentMembershipId;
 
   return (
-    <div className="flex items-center justify-between border-b border-gray-100 py-3 last:border-b-0">
+    <div className="flex items-center justify-between border-b border-stone-100 py-3 last:border-b-0">
       <div className="flex items-center gap-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-sm font-medium text-indigo-700">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-sm font-medium text-brand-700">
           {member.userId.slice(-2).toUpperCase()}
         </div>
         <div>
-          <p className="text-sm font-medium text-gray-900">
+          <p className="text-sm font-medium text-stone-900">
             {member.userId.slice(0, 8)}...
             {isCurrentUser && (
-              <span className="ml-2 text-xs text-gray-500">(you)</span>
+              <span className="ml-2 text-xs text-stone-500">(you)</span>
             )}
           </p>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-stone-500">
             Joined {new Date(member.joinedAt).toLocaleDateString()}
           </p>
         </div>
@@ -109,7 +109,7 @@ function MemberRow({
                 onRoleChange(member.userId, e.target.value as MembershipRole)
               }
               disabled={isUpdating}
-              className="rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-700 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50"
+              className="rounded-xl border border-stone-300 px-2 py-1 text-sm text-stone-700 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 disabled:opacity-50"
               aria-label={`Change role for member ${member.userId.slice(0, 8)}`}
             >
               {ROLE_OPTIONS.map((r) => (
@@ -123,7 +123,7 @@ function MemberRow({
               type="button"
               onClick={() => onRemove(member.userId)}
               disabled={isUpdating}
-              className="rounded-md border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 disabled:opacity-50"
+              className="rounded-xl border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 disabled:opacity-50"
               aria-label={`Remove member ${member.userId.slice(0, 8)}`}
             >
               Remove
@@ -195,16 +195,16 @@ function InviteSection({ treeId, onInviteGenerated }: { treeId: string; onInvite
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">Generate Invite Link</h2>
-      <p className="mt-1 text-sm text-gray-600">
+    <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 className="text-lg font-semibold text-stone-900">Generate Invite Link</h2>
+      <p className="mt-1 text-sm text-stone-600">
         Create a shareable link to invite new members to this tree.
       </p>
 
       <div className="mt-4 space-y-4">
         {/* Role selector */}
         <div>
-          <label htmlFor="invite-role" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="invite-role" className="block text-sm font-medium text-stone-700">
             Role <span className="text-red-500">*</span>
           </label>
           <select
@@ -223,8 +223,8 @@ function InviteSection({ treeId, onInviteGenerated }: { treeId: string; onInvite
 
         {/* Optional label */}
         <div>
-          <label htmlFor="invite-label" className="block text-sm font-medium text-gray-700">
-            Label <span className="text-xs text-gray-400">(optional)</span>
+          <label htmlFor="invite-label" className="block text-sm font-medium text-stone-700">
+            Label <span className="text-xs text-stone-400">(optional)</span>
           </label>
           <input
             id="invite-label"
@@ -239,8 +239,8 @@ function InviteSection({ treeId, onInviteGenerated }: { treeId: string; onInvite
 
         {/* Optional max uses */}
         <div>
-          <label htmlFor="invite-max-uses" className="block text-sm font-medium text-gray-700">
-            Max Uses <span className="text-xs text-gray-400">(optional, default: 1)</span>
+          <label htmlFor="invite-max-uses" className="block text-sm font-medium text-stone-700">
+            Max Uses <span className="text-xs text-stone-400">(optional, default: 1)</span>
           </label>
           <input
             id="invite-max-uses"
@@ -259,7 +259,7 @@ function InviteSection({ treeId, onInviteGenerated }: { treeId: string; onInvite
           type="button"
           onClick={handleGenerate}
           disabled={isGenerating}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-brand-500 px-4 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
         >
           {isGenerating ? 'Generating...' : 'Generate Link'}
         </button>
@@ -269,7 +269,7 @@ function InviteSection({ treeId, onInviteGenerated }: { treeId: string; onInvite
           <div
             role="alert"
             aria-live="polite"
-            className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
           >
             {error}
           </div>
@@ -277,20 +277,20 @@ function InviteSection({ treeId, onInviteGenerated }: { treeId: string; onInvite
 
         {/* Generated invite URL */}
         {generatedInvite && (
-          <div className="rounded-md border border-green-200 bg-green-50 p-4">
+          <div className="rounded-xl border border-green-200 bg-green-50 p-4">
             <p className="text-sm font-medium text-green-800">Invite link generated!</p>
             <div className="mt-2 flex items-center gap-2">
               <input
                 type="text"
                 readOnly
                 value={generatedInvite.inviteUrl}
-                className="flex-1 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700"
+                className="flex-1 rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-700"
                 aria-label="Generated invite URL"
               />
               <button
                 type="button"
                 onClick={handleCopy}
-                className="shrink-0 rounded-md border border-indigo-300 bg-white px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+                className="shrink-0 rounded-xl border border-brand-300 bg-white px-3 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-1"
               >
                 {copied ? 'Copied!' : 'Copy Link'}
               </button>
@@ -389,9 +389,9 @@ function ActiveInvitesSection({
   };
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold text-gray-900">Active Invite Links</h2>
-      <p className="mt-1 text-sm text-gray-600">
+    <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+      <h2 className="text-lg font-semibold text-stone-900">Active Invite Links</h2>
+      <p className="mt-1 text-sm text-stone-600">
         Currently active invite links for this tree.
       </p>
 
@@ -399,7 +399,7 @@ function ActiveInvitesSection({
         <div
           role="alert"
           aria-live="polite"
-          className="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {error}
         </div>
@@ -407,11 +407,11 @@ function ActiveInvitesSection({
 
       <div className="mt-4">
         {isLoading ? (
-          <div className="py-8 text-center text-sm text-gray-500">
+          <div className="py-8 text-center text-sm text-stone-500">
             Loading invite links...
           </div>
         ) : invites.length === 0 ? (
-          <div className="py-8 text-center text-sm text-gray-500">
+          <div className="py-8 text-center text-sm text-stone-500">
             No active invite links.
           </div>
         ) : (
@@ -419,16 +419,16 @@ function ActiveInvitesSection({
             {invites.map((invite) => (
               <div
                 key={invite.id}
-                className="flex items-center justify-between rounded-md border border-gray-100 bg-gray-50 px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-stone-100 bg-stone-50 px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium text-gray-900">
+                    <p className="truncate text-sm font-medium text-stone-900">
                       {invite.label || 'Untitled invite'}
                     </p>
                     <RoleBadge role={invite.role} />
                   </div>
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-stone-500">
                     <span>{formatExpiryDate(invite.expiresAt)}</span>
                     <span>
                       {invite.usedCount}/{invite.maxUses} used
@@ -440,7 +440,7 @@ function ActiveInvitesSection({
                   type="button"
                   onClick={() => handleRevoke(invite.id)}
                   disabled={isRevoking === invite.id}
-                  className="ml-4 shrink-0 rounded-md border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 disabled:opacity-50"
+                  className="ml-4 shrink-0 rounded-xl border border-red-200 px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 disabled:opacity-50"
                   aria-label={`Revoke invite link ${invite.label || 'Untitled invite'}`}
                 >
                   {isRevoking === invite.id ? 'Revoking...' : 'Revoke'}
@@ -512,7 +512,7 @@ export default function MembersPage() {
   if (role !== 'admin') {
     return (
       <div className="mx-auto max-w-2xl">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
           <h1 className="text-xl font-semibold text-red-800">Access Denied</h1>
           <p className="mt-2 text-sm text-red-600">
             Only administrators can manage members.
@@ -580,8 +580,8 @@ export default function MembersPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Members</h1>
-        <p className="mt-1 text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-stone-900">Members</h1>
+        <p className="mt-1 text-sm text-stone-600">
           Manage members and invite new people to &ldquo;{tree.name}&rdquo;.
         </p>
       </div>
@@ -591,30 +591,30 @@ export default function MembersPage() {
         <div
           role="alert"
           aria-live="polite"
-          className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {error}
         </div>
       )}
 
       {/* Member List */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Current Members</h2>
-        <p className="mt-1 text-sm text-gray-600">
+      <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-stone-900">Current Members</h2>
+        <p className="mt-1 text-sm text-stone-600">
           {members.length} {members.length === 1 ? 'member' : 'members'} in this tree.
         </p>
 
         <div className="mt-4">
           {isLoading ? (
-            <div className="py-8 text-center text-sm text-gray-500">
+            <div className="py-8 text-center text-sm text-stone-500">
               Loading members...
             </div>
           ) : members.length === 0 ? (
-            <div className="py-8 text-center text-sm text-gray-500">
+            <div className="py-8 text-center text-sm text-stone-500">
               No members found.
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-stone-100">
               {members.map((member) => (
                 <MemberRow
                   key={member.id}

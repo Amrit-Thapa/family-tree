@@ -103,11 +103,11 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="mx-auto w-full max-w-md rounded-lg border border-gray-200 bg-white p-8 shadow-sm">
+      <div className="mx-auto w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-100">
             <svg
-              className="h-6 w-6 text-indigo-600"
+              className="h-6 w-6 text-brand-600"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={1.5}
@@ -122,23 +122,23 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
             </svg>
           </div>
 
-          <h1 className="mt-4 text-xl font-semibold text-gray-900">
+          <h1 className="mt-4 text-xl font-semibold text-stone-900">
             You&apos;ve Been Invited
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            <span className="font-medium text-gray-900">{inviterName}</span> has
+          <p className="mt-2 text-sm text-stone-600">
+            <span className="font-medium text-stone-900">{inviterName}</span> has
             invited you to join a family tree.
           </p>
         </div>
 
-        <div className="mt-6 rounded-md border border-gray-100 bg-gray-50 p-4">
+        <div className="mt-6 rounded-xl border border-stone-100 bg-stone-50 p-4">
           <dl className="space-y-3">
             <div className="flex items-center justify-between">
-              <dt className="text-sm text-gray-500">Tree</dt>
-              <dd className="text-sm font-medium text-gray-900">{treeName}</dd>
+              <dt className="text-sm text-stone-500">Tree</dt>
+              <dd className="text-sm font-medium text-stone-900">{treeName}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-sm text-gray-500">Role</dt>
+              <dt className="text-sm text-stone-500">Role</dt>
               <dd>
                 <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${getRoleBadgeColor(role)}`}>
                   {role}
@@ -146,8 +146,8 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
               </dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-sm text-gray-500">Invited by</dt>
-              <dd className="text-sm font-medium text-gray-900">{inviterName}</dd>
+              <dt className="text-sm text-stone-500">Invited by</dt>
+              <dd className="text-sm font-medium text-stone-900">{inviterName}</dd>
             </div>
           </dl>
         </div>
@@ -163,13 +163,13 @@ export default async function InviteAcceptPage({ params }: InvitePageProps) {
 function getRoleBadgeColor(role: string): string {
   switch (role) {
     case 'admin':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-sun-100 text-amber-800';
     case 'editor':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-leaf-100 text-leaf-700';
     case 'viewer':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-stone-100 text-stone-800';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-stone-100 text-stone-800';
   }
 }
 
@@ -186,7 +186,7 @@ function InviteErrorLayout({
 }) {
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
-      <div className="mx-auto w-full max-w-md rounded-lg border border-gray-200 bg-white p-8 shadow-sm text-center">
+      <div className="mx-auto w-full max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
           <svg
             className="h-6 w-6 text-red-600"
@@ -204,21 +204,21 @@ function InviteErrorLayout({
           </svg>
         </div>
 
-        <h1 className="mt-4 text-xl font-semibold text-gray-900">{title}</h1>
-        <p className="mt-2 text-sm text-gray-600">{message}</p>
+        <h1 className="mt-4 text-xl font-semibold text-stone-900">{title}</h1>
+        <p className="mt-2 text-sm text-stone-600">{message}</p>
 
         <div className="mt-6">
           {linkHref && linkText ? (
             <a
               href={linkHref}
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="inline-flex items-center rounded-full bg-brand-500 px-4 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
             >
               {linkText}
             </a>
           ) : (
             <a
               href="/dashboard"
-              className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="inline-flex items-center rounded-full bg-brand-500 px-4 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
             >
               Go to Dashboard
             </a>

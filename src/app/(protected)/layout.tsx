@@ -5,6 +5,7 @@ import { connectDB } from '@/lib/db/connection';
 import User from '@/lib/db/models/User';
 import type { IUser } from '@/lib/db/models/User';
 import SidebarNav from '@/components/layout/SidebarNav';
+import MobileTopBar from '@/components/layout/MobileTopBar';
 
 /**
  * Protected layout that wraps all authenticated routes.
@@ -45,9 +46,10 @@ export default async function ProtectedLayout({
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-dvh flex-col overflow-hidden md:flex-row">
       <SidebarNav user={userProfile} />
-      <main className="flex-1 overflow-y-auto bg-gray-50 p-6">
+      <MobileTopBar user={userProfile} />
+      <main className="min-h-0 flex-1 overflow-y-auto bg-cream p-4 md:p-6">
         {children}
       </main>
     </div>

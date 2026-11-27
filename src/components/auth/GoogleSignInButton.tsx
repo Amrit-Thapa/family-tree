@@ -82,7 +82,7 @@ export default function GoogleSignInButton({
       <button
         onClick={handleSignIn}
         disabled={isLoading}
-        className="flex items-center gap-3 rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+        className="flex items-center gap-3 rounded-full border border-stone-300 bg-white px-6 py-3 text-sm font-bold text-stone-700 shadow-sm transition-colors hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
         aria-label="Sign in with Google"
       >
         <GoogleIcon className="h-5 w-5" />
@@ -93,7 +93,7 @@ export default function GoogleSignInButton({
         <div
           role="alert"
           aria-live="polite"
-          className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {error}
         </div>

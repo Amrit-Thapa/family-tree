@@ -54,18 +54,18 @@ const SPOUSE_LINES: Array<[number, number, number]> = [
 function nodeClasses(variant: IllustrationNode['variant']) {
   switch (variant) {
     case 'you':
-      return { circle: 'fill-indigo-600 stroke-indigo-600', text: 'fill-white' };
+      return { circle: 'fill-brand-500 stroke-brand-200', text: 'fill-white' };
     case 'target':
-      return { circle: 'fill-white stroke-indigo-500', text: 'fill-indigo-700' };
+      return { circle: 'fill-sun-100 stroke-sun-400', text: 'fill-amber-800' };
     default:
-      return { circle: 'fill-white stroke-gray-300', text: 'fill-gray-600' };
+      return { circle: 'fill-white stroke-stone-200', text: 'fill-stone-600' };
   }
 }
 
 export default function TreeIllustration({ className }: { className?: string }) {
   return (
     <div className={className}>
-      <div className="relative rounded-2xl border border-gray-200 bg-white p-4 shadow-xl shadow-indigo-100/60 sm:p-6">
+      <div className="relative rounded-[2.5rem] border-2 border-stone-100 bg-white p-4 shadow-[0_8px_0_0_rgb(231_229_228)] sm:p-6">
         <svg
           viewBox="0 0 440 320"
           className="h-auto w-full"
@@ -75,8 +75,8 @@ export default function TreeIllustration({ className }: { className?: string }) 
           {/* Highlighted connection: You → Dad → grandparents → Aunt → Priya */}
           <path
             d="M100 242 V154 H150 V100 H290 V154 H340 V242"
-            className="fill-none stroke-indigo-200"
-            strokeWidth={10}
+            className="fill-none stroke-sun-300"
+            strokeWidth={12}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
@@ -85,8 +85,8 @@ export default function TreeIllustration({ className }: { className?: string }) 
             <path
               key={d}
               d={d}
-              className="fill-none stroke-gray-400"
-              strokeWidth={1.75}
+              className="fill-none stroke-[#c4a484]"
+              strokeWidth={2.5}
             />
           ))}
 
@@ -97,8 +97,8 @@ export default function TreeIllustration({ className }: { className?: string }) 
               x2={x2}
               y1={y}
               y2={y}
-              className="stroke-gray-400"
-              strokeWidth={1.75}
+              className="stroke-brand-400"
+              strokeWidth={2.5}
               strokeDasharray="5 4"
             />
           ))}
@@ -112,13 +112,13 @@ export default function TreeIllustration({ className }: { className?: string }) 
                   cy={node.y}
                   r={NODE_RADIUS}
                   className={classes.circle}
-                  strokeWidth={node.variant ? 3 : 1.5}
+                  strokeWidth={node.variant ? 4 : 2.5}
                 />
                 <text
                   x={node.x}
                   y={node.y + 4}
                   textAnchor="middle"
-                  className={`${classes.text} text-[11px] font-semibold`}
+                  className={`${classes.text} text-[11px] font-extrabold`}
                 >
                   {node.initials}
                 </text>
@@ -126,7 +126,7 @@ export default function TreeIllustration({ className }: { className?: string }) 
                   x={node.x}
                   y={node.y + NODE_RADIUS + 15}
                   textAnchor="middle"
-                  className="fill-gray-500 text-[10px]"
+                  className="fill-stone-500 text-[10px] font-bold"
                 >
                   {node.name}
                 </text>
@@ -136,13 +136,13 @@ export default function TreeIllustration({ className }: { className?: string }) 
         </svg>
 
         {/* Relationship callout, like the graph's side panel */}
-        <div className="absolute -bottom-5 right-4 flex items-center gap-3 rounded-xl border border-indigo-100 bg-white px-4 py-3 shadow-lg sm:right-6">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-semibold text-indigo-700">
+        <div className="absolute -bottom-10 right-4 flex items-center gap-3 rounded-3xl border-2 border-sun-300 bg-white px-4 py-3 shadow-[0_4px_0_0_var(--color-sun-300)] animate-float sm:right-6">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun-100 text-xs font-extrabold text-amber-800">
             PV
           </span>
           <div className="text-left">
-            <p className="text-sm font-semibold text-gray-900">Priya</p>
-            <p className="text-xs text-indigo-700">Your first cousin</p>
+            <p className="text-sm font-extrabold text-stone-900">Priya 👋</p>
+            <p className="text-xs font-bold text-brand-600">Your first cousin!</p>
           </div>
         </div>
       </div>

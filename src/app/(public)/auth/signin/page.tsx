@@ -1,8 +1,8 @@
 import GoogleSignInButton from '@/components/auth/GoogleSignInButton';
 
 export const metadata = {
-  title: 'Sign In — Family Relationship Platform',
-  description: 'Sign in with your Google account to access the Family Relationship Platform.',
+  title: 'Sign in — Family Tree',
+  description: 'Sign in with your Google account to see your family trees.',
 };
 
 interface SignInPageProps {
@@ -23,14 +23,17 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   const redirectTo = isSafeCallback ? callbackUrl : '/dashboard';
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-8 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-cream px-4">
+      <div className="w-full max-w-sm space-y-8 rounded-[2rem] border-2 border-stone-200/70 bg-white px-8 py-10 text-center shadow-[0_6px_0_0_rgb(231_229_228)] animate-pop-in">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Welcome
+          <div aria-hidden="true" className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-3xl bg-leaf-100 text-3xl animate-float">
+            🌳
+          </div>
+          <h1 className="text-3xl font-semibold text-stone-900">
+            Welcome back! 👋
           </h1>
-          <p className="mt-2 text-sm text-gray-600">
-            Sign in to access your family trees and connections.
+          <p className="mt-2 text-sm text-stone-600">
+            Hop in to see your family trees and everyone in them.
           </p>
         </div>
 

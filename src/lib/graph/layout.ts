@@ -20,6 +20,16 @@ export interface LayoutResult {
  */
 export const PERSON_NODE_HEIGHT = 122;
 
+/** Graph line colours (warm & cosy theme) */
+export const GRAPH_COLORS = {
+  /** Parent → child lines: warm branch brown */
+  branch: '#c4a484',
+  /** Spouse lines: coral */
+  spouse: '#fa8064',
+  /** Divorced / separated spouse lines: muted stone */
+  spouseInactive: '#d6d3d1',
+} as const;
+
 const DEFAULT_NODE_WIDTH = 180;
 const DEFAULT_NODE_HEIGHT = PERSON_NODE_HEIGHT;
 const JUNCTION_SIZE = 2;
@@ -390,8 +400,8 @@ export function computeDagreLayout(
       data: { isSpouse: true, spouseStatus: edge.data?.spouseStatus },
       style: {
         strokeDasharray: '6 4',
-        stroke: isInactive ? '#d1d5db' : '#f472b6',
-        strokeWidth: 2,
+        stroke: isInactive ? GRAPH_COLORS.spouseInactive : GRAPH_COLORS.spouse,
+        strokeWidth: 2.5,
       },
     });
   }
@@ -418,7 +428,7 @@ export function computeDagreLayout(
       targetHandle: 'left',
       type: 'straight',
       data: { isSpouse: true },
-      style: { strokeDasharray: '6 4', stroke: '#f472b6', strokeWidth: 2 },
+      style: { strokeDasharray: '6 4', stroke: GRAPH_COLORS.spouse, strokeWidth: 2.5 },
     });
   }
 
@@ -434,7 +444,7 @@ export function computeDagreLayout(
       target: couple.junctionId,
       type: 'smoothstep',
       data: { isSpouse: false },
-      style: { stroke: '#94a3b8', strokeWidth: 2 },
+      style: { stroke: GRAPH_COLORS.branch, strokeWidth: 2.5 },
     });
 
     // Spouse2 → junction
@@ -445,7 +455,7 @@ export function computeDagreLayout(
       target: couple.junctionId,
       type: 'smoothstep',
       data: { isSpouse: false },
-      style: { stroke: '#94a3b8', strokeWidth: 2 },
+      style: { stroke: GRAPH_COLORS.branch, strokeWidth: 2.5 },
     });
 
     // Junction → each shared child
@@ -457,8 +467,8 @@ export function computeDagreLayout(
         targetHandle: 'top',
         type: 'smoothstep',
         data: { isSpouse: false },
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: { stroke: '#94a3b8', strokeWidth: 2 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: GRAPH_COLORS.branch },
+        style: { stroke: GRAPH_COLORS.branch, strokeWidth: 2.5 },
       });
     }
   }
@@ -473,8 +483,8 @@ export function computeDagreLayout(
         sourceHandle: 'bottom',
         targetHandle: 'top',
         type: 'smoothstep',
-        markerEnd: { type: MarkerType.ArrowClosed },
-        style: { stroke: '#94a3b8', strokeWidth: 2 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: GRAPH_COLORS.branch },
+        style: { stroke: GRAPH_COLORS.branch, strokeWidth: 2.5 },
       });
     }
   }

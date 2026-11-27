@@ -77,12 +77,12 @@ function PersonRow({
       <div className="flex min-w-0 items-center gap-2">
         <button
           onClick={onOpen}
-          className="truncate text-sm text-indigo-600 hover:text-indigo-800 hover:underline focus:outline-none focus:underline"
+          className="truncate text-sm font-bold text-stone-800 decoration-brand-300 decoration-2 underline-offset-4 hover:text-brand-600 hover:underline focus:outline-none focus:underline"
         >
           {name}
         </button>
         {badge && (
-          <span className="shrink-0 text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+          <span className="shrink-0 text-[11px] font-bold text-amber-800 bg-sun-100 px-2 py-0.5 rounded-full">
             {badge}
           </span>
         )}
@@ -91,7 +91,7 @@ function PersonRow({
         <button
           onClick={onRemove}
           disabled={removeDisabled}
-          className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
+          className="flex h-6 w-6 items-center justify-center rounded-full text-xs text-stone-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
           aria-label={removeLabel}
         >
           ✕
@@ -108,22 +108,22 @@ function LoadingSkeleton() {
     <div className="animate-pulse space-y-4 p-6" aria-label="Loading person details">
       {/* Avatar skeleton */}
       <div className="flex items-center gap-3">
-        <div className="h-16 w-16 rounded-full bg-gray-200" />
+        <div className="h-16 w-16 rounded-full bg-stone-200" />
         <div className="space-y-2">
-          <div className="h-4 w-32 rounded bg-gray-200" />
-          <div className="h-3 w-24 rounded bg-gray-200" />
+          <div className="h-4 w-32 rounded bg-stone-200" />
+          <div className="h-3 w-24 rounded bg-stone-200" />
         </div>
       </div>
       {/* Details skeleton */}
       <div className="space-y-3 pt-4">
-        <div className="h-3 w-40 rounded bg-gray-200" />
-        <div className="h-3 w-36 rounded bg-gray-200" />
+        <div className="h-3 w-40 rounded bg-stone-200" />
+        <div className="h-3 w-36 rounded bg-stone-200" />
       </div>
       {/* Relationships skeleton */}
       <div className="space-y-3 pt-4">
-        <div className="h-4 w-28 rounded bg-gray-200" />
-        <div className="h-3 w-44 rounded bg-gray-200" />
-        <div className="h-3 w-36 rounded bg-gray-200" />
+        <div className="h-4 w-28 rounded bg-stone-200" />
+        <div className="h-3 w-44 rounded bg-stone-200" />
+        <div className="h-3 w-36 rounded bg-stone-200" />
       </div>
     </div>
   );
@@ -254,7 +254,7 @@ export default function SidePanel({
 
   const quickAddForm =
     node && quickAdd ? (
-      <div className="rounded-lg border border-indigo-100 bg-indigo-50/30 p-3">
+      <div className="rounded-2xl border border-brand-100 bg-brand-50/30 p-3">
         <QuickAddRelationship
           key={`${node.id}-${quickAdd}`}
           treeId={treeId}
@@ -394,21 +394,34 @@ export default function SidePanel({
   }
 
   return (
+    <>
+    {/* Dimmed backdrop behind the sheet on phones; tapping it closes the sheet */}
+    <div
+      aria-hidden="true"
+      className={`fixed inset-0 z-40 bg-stone-900/30 transition-opacity duration-300 md:hidden ${
+        node ? 'opacity-100' : 'pointer-events-none opacity-0'
+      }`}
+    />
     <div
       ref={panelRef}
       className={`
-        fixed top-0 right-0 h-full w-96 max-w-full bg-white shadow-xl border-l border-gray-200
-        transform transition-transform duration-300 ease-in-out z-50
-        ${node ? 'translate-x-0' : 'translate-x-full'}
+        fixed z-50 flex flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out
+        inset-x-0 bottom-0 h-[85dvh] rounded-t-[2rem] border-t-2 border-stone-100
+        md:inset-x-auto md:right-0 md:top-0 md:h-full md:w-96 md:max-w-full
+        md:rounded-t-none md:rounded-l-[2rem] md:border-t-0 md:border-l-2
+        ${node ? 'translate-y-0 md:translate-x-0' : 'translate-y-full md:translate-y-0 md:translate-x-full'}
       `}
       role="complementary"
       aria-label="Person details panel"
       aria-hidden={!node}
+      inert={!node}
     >
+      {/* Grab handle (phones) */}
+      <div aria-hidden="true" className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-stone-200 md:hidden" />
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 p-1 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="absolute top-4 right-4 p-1 rounded-xl text-stone-400 hover:text-stone-600 hover:bg-stone-100 focus:outline-none focus:ring-2 focus:ring-brand-500"
         aria-label="Close panel"
       >
         <svg
@@ -426,7 +439,7 @@ export default function SidePanel({
       </button>
 
       {/* Panel content */}
-      <div className="h-full overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[env(safe-area-inset-bottom)]">
         {isLoading && node ? (
           <LoadingSkeleton />
         ) : node ? (
@@ -437,16 +450,24 @@ export default function SidePanel({
                 <img
                   src={node.profilePhotoUrl}
                   alt={`${node.firstName}'s photo`}
-                  className="h-16 w-16 rounded-full object-cover"
+                  className="h-16 w-16 rounded-full object-cover ring-4 ring-cream"
                 />
               ) : (
-                <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center text-xl font-semibold text-gray-500">
+                <div
+                  className={`h-16 w-16 rounded-full flex items-center justify-center text-xl font-extrabold text-white ring-4 ${
+                    node.gender === 'male'
+                      ? 'bg-gradient-to-br from-sky-300 to-sky-500 ring-sky-100'
+                      : node.gender === 'female'
+                        ? 'bg-gradient-to-br from-rose-300 to-rose-500 ring-rose-100'
+                        : 'bg-gradient-to-br from-sun-300 to-sun-500 ring-sun-100'
+                  }`}
+                >
                   {node.firstName.charAt(0).toUpperCase()}
                   {node.lastName?.charAt(0).toUpperCase() ?? ''}
                 </div>
               )}
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-stone-900">
                   {formatDisplayName(node.firstName, node.lastName)}
                 </h2>
               </div>
@@ -458,7 +479,7 @@ export default function SidePanel({
                 {canEdit && (
                   <button
                     onClick={() => setShowEditForm(true)}
-                    className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500"
                   >
                     Edit
                   </button>
@@ -466,7 +487,7 @@ export default function SidePanel({
                 {canDelete && (
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="rounded-md border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    className="rounded-xl border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
                     Delete
                   </button>
@@ -476,7 +497,7 @@ export default function SidePanel({
 
             {/* Delete confirmation */}
             {showDeleteConfirm && (
-              <div className="rounded-lg border border-red-200 bg-red-50 p-4 space-y-3">
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 space-y-3">
                 <p className="text-sm text-red-800 font-medium">
                   Permanently delete {formatDisplayName(node.firstName, node.lastName)}?
                 </p>
@@ -487,14 +508,14 @@ export default function SidePanel({
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="rounded-md bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                    className="rounded-xl bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
                   >
                     {isDeleting ? 'Deleting...' : 'Yes, Delete'}
                   </button>
                   <button
                     onClick={() => setShowDeleteConfirm(false)}
                     disabled={isDeleting}
-                    className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-50 disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -504,11 +525,11 @@ export default function SidePanel({
 
             {/* Invite to Claim (profile-only nodes, admin only) */}
             {isAdmin && !node.linkedUserId && (
-              <div className="rounded-lg border border-indigo-100 bg-indigo-50/30 p-3 space-y-2">
+              <div className="rounded-2xl border border-brand-100 bg-brand-50/30 p-3 space-y-2">
                 {!showInviteForm && !inviteUrl && (
                   <button
                     onClick={() => setShowInviteForm(true)}
-                    className="w-full rounded-md border border-indigo-200 bg-white px-3 py-2 text-xs font-medium text-indigo-600 hover:bg-indigo-50"
+                    className="w-full rounded-xl border border-brand-200 bg-white px-3 py-2 text-xs font-medium text-brand-600 hover:bg-brand-50"
                   >
                     🔗 Invite Someone to Claim This Profile
                   </button>
@@ -516,14 +537,14 @@ export default function SidePanel({
 
                 {showInviteForm && !inviteUrl && (
                   <div className="space-y-2">
-                    <p className="text-xs font-medium text-gray-700">Generate invite link</p>
+                    <p className="text-xs font-medium text-stone-700">Generate invite link</p>
                     <div>
-                      <label htmlFor="invite-role" className="block text-xs text-gray-500">Role</label>
+                      <label htmlFor="invite-role" className="block text-xs text-stone-500">Role</label>
                       <select
                         id="invite-role"
                         value={inviteRole}
                         onChange={(e) => setInviteRole(e.target.value as 'admin' | 'editor' | 'viewer')}
-                        className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-900 shadow-sm focus:border-brand-500 focus:ring-brand-500"
                       >
                         <option value="viewer">Viewer</option>
                         <option value="editor">Editor</option>
@@ -537,13 +558,13 @@ export default function SidePanel({
                       <button
                         onClick={handleGenerateInvite}
                         disabled={isGeneratingInvite}
-                        className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                        className="rounded-full bg-brand-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-600 disabled:opacity-50 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
                       >
                         {isGeneratingInvite ? 'Generating...' : 'Generate Link'}
                       </button>
                       <button
                         onClick={() => { setShowInviteForm(false); setInviteError(null); }}
-                        className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50"
+                        className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-50"
                       >
                         Cancel
                       </button>
@@ -559,16 +580,16 @@ export default function SidePanel({
                         type="text"
                         readOnly
                         value={inviteUrl}
-                        className="flex-1 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 truncate"
+                        className="flex-1 rounded-xl border border-stone-300 bg-white px-2 py-1.5 text-xs text-stone-700 truncate"
                       />
                       <button
                         onClick={handleCopyInvite}
-                        className="shrink-0 rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+                        className="shrink-0 rounded-full bg-brand-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-600 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
                       >
                         {copied ? '✓ Copied' : 'Copy'}
                       </button>
                     </div>
-                    <p className="text-xs text-gray-500">Expires in 7 days. Single use.</p>
+                    <p className="text-xs text-stone-500">Expires in 7 days. Single use.</p>
                   </div>
                 )}
               </div>
@@ -576,9 +597,9 @@ export default function SidePanel({
 
             {/* Edit form */}
             {showEditForm && (
-              <form onSubmit={handleEditSubmit} className="rounded-lg border border-gray-200 bg-gray-50 p-4 space-y-3">
+              <form onSubmit={handleEditSubmit} className="rounded-2xl border border-stone-200 bg-stone-50 p-4 space-y-3">
                 <div>
-                  <label htmlFor="edit-firstName" className="block text-xs font-medium text-gray-700">First Name *</label>
+                  <label htmlFor="edit-firstName" className="block text-xs font-medium text-stone-700">First Name *</label>
                   <input
                     id="edit-firstName"
                     name="firstName"
@@ -586,47 +607,47 @@ export default function SidePanel({
                     defaultValue={node.firstName}
                     required
                     maxLength={100}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:ring-brand-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="edit-lastName" className="block text-xs font-medium text-gray-700">Last Name</label>
+                  <label htmlFor="edit-lastName" className="block text-xs font-medium text-stone-700">Last Name</label>
                   <input
                     id="edit-lastName"
                     name="lastName"
                     type="text"
                     defaultValue={node.lastName ?? ''}
                     maxLength={100}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:ring-brand-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="edit-dateOfBirth" className="block text-xs font-medium text-gray-700">Date of Birth</label>
+                  <label htmlFor="edit-dateOfBirth" className="block text-xs font-medium text-stone-700">Date of Birth</label>
                   <input
                     id="edit-dateOfBirth"
                     name="dateOfBirth"
                     type="date"
                     defaultValue={node.dateOfBirth ? node.dateOfBirth.split('T')[0] : ''}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:ring-brand-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="edit-dateOfDeath" className="block text-xs font-medium text-gray-700">Date of Death</label>
+                  <label htmlFor="edit-dateOfDeath" className="block text-xs font-medium text-stone-700">Date of Death</label>
                   <input
                     id="edit-dateOfDeath"
                     name="dateOfDeath"
                     type="date"
                     defaultValue={node.dateOfDeath ? node.dateOfDeath.split('T')[0] : ''}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:ring-brand-500"
                   />
                 </div>
                 <div>
-                  <label htmlFor="edit-gender" className="block text-xs font-medium text-gray-700">Gender</label>
+                  <label htmlFor="edit-gender" className="block text-xs font-medium text-stone-700">Gender</label>
                   <select
                     id="edit-gender"
                     name="gender"
                     defaultValue={node.gender ?? ''}
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="mt-1 block w-full rounded-xl border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-900 shadow-sm focus:border-brand-500 focus:ring-brand-500"
                   >
                     <option value="">Not specified</option>
                     <option value="male">Male</option>
@@ -642,7 +663,7 @@ export default function SidePanel({
                   <button
                     type="submit"
                     disabled={isSaving}
-                    className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                    className="rounded-full bg-brand-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-600 disabled:opacity-50 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
                   >
                     {isSaving ? 'Saving...' : 'Save'}
                   </button>
@@ -650,7 +671,7 @@ export default function SidePanel({
                     type="button"
                     onClick={() => { setShowEditForm(false); setEditError(null); }}
                     disabled={isSaving}
-                    className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                    className="rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-50 disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -661,20 +682,20 @@ export default function SidePanel({
             {/* Person details — omit fields with no value */}
             <div className="space-y-2">
               {node.dateOfBirth && (
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium text-gray-700">Born:</span>{' '}
+                <p className="text-sm text-stone-600">
+                  <span className="font-medium text-stone-700">Born:</span>{' '}
                   {formatDate(node.dateOfBirth)}
                 </p>
               )}
               {node.dateOfDeath && (
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium text-gray-700">Died:</span>{' '}
+                <p className="text-sm text-stone-600">
+                  <span className="font-medium text-stone-700">Died:</span>{' '}
                   {formatDate(node.dateOfDeath)}
                 </p>
               )}
               {node.gender && (
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium text-gray-700">Gender:</span>{' '}
+                <p className="text-sm text-stone-600">
+                  <span className="font-medium text-stone-700">Gender:</span>{' '}
                   {node.gender.charAt(0).toUpperCase() + node.gender.slice(1).replace(/_/g, ' ')}
                 </p>
               )}
@@ -682,14 +703,14 @@ export default function SidePanel({
 
             {/* Family: parents (always shown, with slots for missing ones), spouses, siblings, children */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-                Family
+              <h3 className="text-lg font-semibold text-stone-900">
+                <span aria-hidden="true">🏡</span> Family
               </h3>
 
               <div className="space-y-4">
                 {/* Parents */}
                 <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">Parents</h4>
+                  <h4 className="text-xs font-extrabold text-stone-400 uppercase tracking-wide mb-1">Parents</h4>
                   <ul className="space-y-1">
                     {(['father', 'mother'] as const).map((parentType) => {
                       const parent = grouped[parentType];
@@ -722,16 +743,16 @@ export default function SidePanel({
                                 setQuickAdd(parentType);
                               }}
                               aria-pressed={quickAdd === parentType}
-                              className={`w-full rounded-md border border-dashed px-2 py-1.5 text-left text-sm transition-colors ${
+                              className={`w-full rounded-xl border border-dashed px-2 py-1.5 text-left text-sm transition-colors ${
                                 quickAdd === parentType
-                                  ? 'border-indigo-300 bg-indigo-50 text-indigo-700'
-                                  : 'border-gray-300 text-gray-500 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700'
+                                  ? 'border-brand-300 bg-brand-50 text-brand-700'
+                                  : 'border-stone-300 text-stone-500 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700'
                               }`}
                             >
                               + Add {parentType}
                             </button>
                           ) : (
-                            <span className="text-sm text-gray-400 italic">
+                            <span className="text-sm text-stone-400 italic">
                               {parentType === 'father' ? 'Father' : 'Mother'} not added
                             </span>
                           )}
@@ -747,7 +768,7 @@ export default function SidePanel({
                 {/* Spouses */}
                 {grouped.spouses.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
+                    <h4 className="text-xs font-extrabold text-stone-400 uppercase tracking-wide mb-1">
                       {grouped.spouses.length === 1 ? 'Spouse' : 'Spouses'}
                     </h4>
                     <ul className="space-y-1">
@@ -776,7 +797,7 @@ export default function SidePanel({
                 {/* Siblings (derived from shared parents, so no remove button) */}
                 {siblings.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">Siblings</h4>
+                    <h4 className="text-xs font-extrabold text-stone-400 uppercase tracking-wide mb-1">Siblings</h4>
                     <ul className="space-y-1">
                       {siblings.map((sib) => (
                         <PersonRow
@@ -799,7 +820,7 @@ export default function SidePanel({
                 {/* Children */}
                 {grouped.children.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">Children</h4>
+                    <h4 className="text-xs font-extrabold text-stone-400 uppercase tracking-wide mb-1">Children</h4>
                     <ul className="space-y-1">
                       {grouped.children.map((child) => (
                         <PersonRow
@@ -832,19 +853,19 @@ export default function SidePanel({
 
             {/* Extended family (derived), grouped by relationship */}
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">
-                Extended Family
+              <h3 className="text-lg font-semibold text-stone-900">
+                <span aria-hidden="true">🌳</span> Extended family
               </h3>
 
               {extendedGroups.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">
-                  No extended family connections found.
+                <p className="rounded-2xl bg-cream px-3 py-2 text-sm text-stone-500">
+                  No grandparents, aunties or cousins here yet <span aria-hidden="true">🌱</span>
                 </p>
               ) : (
                 <div className="space-y-4">
                   {extendedGroups.map((group) => (
                     <div key={group.type}>
-                      <h4 className="text-xs font-medium text-gray-500 uppercase mb-1">
+                      <h4 className="text-xs font-extrabold text-stone-400 uppercase tracking-wide mb-1">
                         {group.label}
                       </h4>
                       <ul className="space-y-1">
@@ -864,7 +885,7 @@ export default function SidePanel({
 
             {/* Admin: Add Relationship */}
             {isAdmin && (
-              <div className="border-t border-gray-200 pt-4 space-y-3">
+              <div className="border-t border-stone-200 pt-4 space-y-3">
                 {/* Quick-add buttons (parents are added from their slots above) */}
                 {!showAddRelationship && quickAdd !== 'child' && quickAdd !== 'spouse' && (
                   <div className="grid grid-cols-2 gap-2">
@@ -872,17 +893,17 @@ export default function SidePanel({
                       onClick={() => {
                         setQuickAdd('child');
                       }}
-                      className="rounded-md border border-gray-200 bg-gray-50 px-2 py-2 text-xs font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition-colors"
+                      className="rounded-full border-2 border-stone-200 bg-cream px-2 py-2 text-xs font-bold text-stone-700 hover:bg-sun-100 hover:text-amber-800 hover:border-sun-300 transition-colors"
                     >
-                      + Child
+                      <span aria-hidden="true">👶</span> Add child
                     </button>
                     <button
                       onClick={() => {
                         setQuickAdd('spouse');
                       }}
-                      className="rounded-md border border-gray-200 bg-gray-50 px-2 py-2 text-xs font-medium text-gray-700 hover:bg-pink-50 hover:text-pink-700 hover:border-pink-200 transition-colors"
+                      className="rounded-full border-2 border-stone-200 bg-cream px-2 py-2 text-xs font-bold text-stone-700 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200 transition-colors"
                     >
-                      + Spouse
+                      <span aria-hidden="true">💍</span> Add spouse
                     </button>
                   </div>
                 )}
@@ -907,7 +928,7 @@ export default function SidePanel({
                     ) : (
                       <button
                         onClick={() => setShowAddRelationship(true)}
-                        className="w-full rounded-md border border-indigo-200 bg-white px-4 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="w-full rounded-xl border border-brand-200 bg-white px-4 py-2 text-sm font-medium text-brand-600 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
                       >
                         Link Existing Person
                       </button>
@@ -920,5 +941,6 @@ export default function SidePanel({
         ) : null}
       </div>
     </div>
+    </>
   );
 }

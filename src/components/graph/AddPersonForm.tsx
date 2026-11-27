@@ -50,7 +50,7 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
 ];
 
 const INPUT_CLASSES =
-  'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm';
+  'mt-1 block w-full rounded-xl border border-stone-300 px-3 py-2 text-stone-900 placeholder-stone-400 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:text-sm';
 
 // --- Component ---
 
@@ -237,7 +237,7 @@ export default function AddPersonForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" aria-label="Add person form" noValidate>
-      <h3 className="text-lg font-semibold text-gray-900">
+      <h3 className="text-lg font-semibold text-stone-900">
         {hasPrefill
           ? prefillRelationship.type === 'spouse'
             ? 'Add Spouse'
@@ -248,13 +248,13 @@ export default function AddPersonForm({
       </h3>
 
       {errors.general && (
-        <div role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
           {errors.general}
         </div>
       )}
 
       {successMessage && (
-        <div role="status" className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-700">
+        <div role="status" className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
           {successMessage}
         </div>
       )}
@@ -262,7 +262,7 @@ export default function AddPersonForm({
       {/* Name fields — side by side */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label htmlFor="add-person-firstName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="add-person-firstName" className="block text-sm font-medium text-stone-700">
             First Name <span className="text-red-500">*</span>
           </label>
           <input
@@ -281,7 +281,7 @@ export default function AddPersonForm({
           )}
         </div>
         <div>
-          <label htmlFor="add-person-lastName" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="add-person-lastName" className="block text-sm font-medium text-stone-700">
             Last Name
           </label>
           <input
@@ -299,7 +299,7 @@ export default function AddPersonForm({
       {/* Gender + Dates — compact row */}
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <label htmlFor="add-person-gender" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="add-person-gender" className="block text-sm font-medium text-stone-700">
             Gender
           </label>
           <select
@@ -315,7 +315,7 @@ export default function AddPersonForm({
           </select>
         </div>
         <div>
-          <label htmlFor="add-person-dob" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="add-person-dob" className="block text-sm font-medium text-stone-700">
             Born
           </label>
           <input
@@ -327,7 +327,7 @@ export default function AddPersonForm({
           />
         </div>
         <div>
-          <label htmlFor="add-person-dod" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="add-person-dod" className="block text-sm font-medium text-stone-700">
             Died
           </label>
           <input
@@ -346,14 +346,14 @@ export default function AddPersonForm({
 
       {/* Relationship section */}
       {!hasPrefill && allNodes.length > 0 && (
-        <div className="border-t border-gray-100 pt-4 space-y-3">
-          <p className="text-sm font-medium text-gray-700">
-            Connect to existing person <span className="text-gray-400">(optional)</span>
+        <div className="border-t border-stone-100 pt-4 space-y-3">
+          <p className="text-sm font-medium text-stone-700">
+            Connect to existing person <span className="text-stone-400">(optional)</span>
           </p>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="rel-type" className="block text-xs font-medium text-gray-500">
+              <label htmlFor="rel-type" className="block text-xs font-medium text-stone-500">
                 Relationship
               </label>
               <select
@@ -369,7 +369,7 @@ export default function AddPersonForm({
               </select>
             </div>
             <div>
-              <label htmlFor="rel-target" className="block text-xs font-medium text-gray-500">
+              <label htmlFor="rel-target" className="block text-xs font-medium text-stone-500">
                 Person
               </label>
               <select
@@ -390,23 +390,23 @@ export default function AddPersonForm({
           {relType === 'father' || relType === 'mother' ? (
             relTargetNodeId && (
               <div className="flex gap-4">
-                <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-1.5 text-sm text-stone-700 cursor-pointer">
                   <input
                     type="radio"
                     name="rel-direction"
                     checked={relDirection === 'new_is_child'}
                     onChange={() => setRelDirection('new_is_child')}
-                    className="h-3.5 w-3.5 text-indigo-600"
+                    className="h-3.5 w-3.5 text-brand-600"
                   />
                   New person is child
                 </label>
-                <label className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-1.5 text-sm text-stone-700 cursor-pointer">
                   <input
                     type="radio"
                     name="rel-direction"
                     checked={relDirection === 'new_is_parent'}
                     onChange={() => setRelDirection('new_is_parent')}
-                    className="h-3.5 w-3.5 text-indigo-600"
+                    className="h-3.5 w-3.5 text-brand-600"
                   />
                   New person is {relType}
                 </label>
@@ -418,7 +418,7 @@ export default function AddPersonForm({
 
       {/* Pre-filled relationship indicator */}
       {hasPrefill && (
-        <div className="rounded-md bg-indigo-50 px-3 py-2 text-sm text-indigo-700">
+        <div className="rounded-xl bg-brand-50 px-3 py-2 text-sm text-brand-700">
           Will be added as{' '}
           <span className="font-medium">
             {prefillRelationship.type === 'spouse'
@@ -438,13 +438,13 @@ export default function AddPersonForm({
 
       {/* Also link the other parent */}
       {coParent && relDirection === 'new_is_child' && (
-        <label className="flex items-center gap-2 text-sm text-gray-700">
+        <label className="flex items-center gap-2 text-sm text-stone-700">
           <input
             type="checkbox"
             checked={linkCoParent}
             onChange={(e) => setLinkCoParent(e.target.checked)}
             disabled={isSubmitting}
-            className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            className="h-4 w-4 rounded border-stone-300 text-brand-600 focus:ring-brand-500"
           />
           Also add as child of <span className="font-medium">{coParent.label}</span>
         </label>
@@ -457,7 +457,7 @@ export default function AddPersonForm({
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+            className="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-60"
           >
             Cancel
           </button>
@@ -465,7 +465,7 @@ export default function AddPersonForm({
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-full bg-brand-500 px-4 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
         >
           {isSubmitting ? 'Adding...' : 'Add Person'}
         </button>

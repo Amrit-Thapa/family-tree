@@ -8,7 +8,7 @@ import { TREE_NAME_MAX, TREE_DESCRIPTION_MAX } from '@/lib/validations/tree';
 // --- Constants ---
 
 const INPUT_CLASSES =
-  'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm';
+  'mt-1 block w-full rounded-xl border border-stone-300 px-3 py-2 text-stone-900 placeholder-stone-400 shadow-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 sm:text-sm';
 
 // --- Reusable field error component ---
 
@@ -27,7 +27,7 @@ function FieldError({ state, field }: { state: ActionState | null; field: FormFi
 
 function CharacterCounter({ current, max }: { current: number; max: number }) {
   return (
-    <span className="text-xs text-gray-400">
+    <span className="text-xs text-stone-400">
       {current}/{max}
     </span>
   );
@@ -59,19 +59,19 @@ function DeleteConfirmationDialog({
       aria-modal="true"
       aria-labelledby="delete-dialog-title"
     >
-      <div className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+      <div className="mx-4 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
         <h2
           id="delete-dialog-title"
-          className="text-lg font-semibold text-gray-900"
+          className="text-lg font-semibold text-stone-900"
         >
           Delete Family Tree
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
+        <p className="mt-2 text-sm text-stone-600">
           Are you sure you want to delete{' '}
-          <span className="font-medium text-gray-900">&ldquo;{treeName}&rdquo;</span>?
+          <span className="font-medium text-stone-900">&ldquo;{treeName}&rdquo;</span>?
           This action will soft-delete the tree. It can be restored within 30 days.
         </p>
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-stone-500">
           Only the sole admin of a tree can delete it. If there are other admins,
           they must be removed first.
         </p>
@@ -80,7 +80,7 @@ function DeleteConfirmationDialog({
           <div
             role="alert"
             aria-live="polite"
-            className="mt-3 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="mt-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
           >
             {error}
           </div>
@@ -91,7 +91,7 @@ function DeleteConfirmationDialog({
             type="button"
             onClick={onClose}
             disabled={isPending}
-            className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+            className="rounded-full border border-stone-300 bg-white px-4 py-2 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-60"
           >
             Cancel
           </button>
@@ -99,7 +99,7 @@ function DeleteConfirmationDialog({
             type="button"
             onClick={onConfirm}
             disabled={isPending}
-            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isPending ? 'Deleting...' : 'Delete Tree'}
           </button>
@@ -144,7 +144,7 @@ export default function TreeSettingsPage() {
   if (role !== 'admin') {
     return (
       <div className="mx-auto max-w-2xl">
-        <div className="rounded-lg border border-red-200 bg-red-50 p-8 text-center">
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
           <h1 className="text-xl font-semibold text-red-800">Access Denied</h1>
           <p className="mt-2 text-sm text-red-600">
             Only administrators can access tree settings.
@@ -163,16 +163,16 @@ export default function TreeSettingsPage() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Tree Settings</h1>
-        <p className="mt-1 text-sm text-gray-600">
+        <h1 className="text-2xl font-bold text-stone-900">Tree Settings</h1>
+        <p className="mt-1 text-sm text-stone-600">
           Manage your family tree&apos;s name, description, and other settings.
         </p>
       </div>
 
       {/* Edit Form */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">General</h2>
-        <p className="mt-1 text-sm text-gray-600">
+      <div className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-stone-900">General</h2>
+        <p className="mt-1 text-sm text-stone-600">
           Update your tree&apos;s basic information.
         </p>
 
@@ -182,7 +182,7 @@ export default function TreeSettingsPage() {
           <div>
             <label
               htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-stone-700"
             >
               Tree Name <span className="text-red-500">*</span>
             </label>
@@ -198,7 +198,7 @@ export default function TreeSettingsPage() {
               aria-describedby="name-hint"
               aria-invalid={updateState?.error?.field === 'name' ? 'true' : undefined}
             />
-            <p id="name-hint" className="mt-1 text-xs text-gray-500">
+            <p id="name-hint" className="mt-1 text-xs text-stone-500">
               1–{TREE_NAME_MAX} characters. Must not be empty after trimming.
             </p>
             <FieldError state={updateState} field="name" />
@@ -207,7 +207,7 @@ export default function TreeSettingsPage() {
           <div>
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-stone-700"
             >
               Description
             </label>
@@ -224,7 +224,7 @@ export default function TreeSettingsPage() {
               onChange={(e) => setDescriptionLength(e.target.value.length)}
             />
             <div className="mt-1 flex items-center justify-between">
-              <p id="description-hint" className="text-xs text-gray-500">
+              <p id="description-hint" className="text-xs text-stone-500">
                 Up to {TREE_DESCRIPTION_MAX} characters.
               </p>
               <CharacterCounter current={descriptionLength} max={TREE_DESCRIPTION_MAX} />
@@ -237,7 +237,7 @@ export default function TreeSettingsPage() {
             <div
               role="alert"
               aria-live="polite"
-              className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+              className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
             >
               {updateState.error.message}
             </div>
@@ -248,7 +248,7 @@ export default function TreeSettingsPage() {
             <div
               role="status"
               aria-live="polite"
-              className="rounded-md bg-green-50 px-4 py-3 text-sm text-green-700"
+              className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700"
             >
               Tree settings updated successfully.
             </div>
@@ -258,7 +258,7 @@ export default function TreeSettingsPage() {
             <button
               type="submit"
               disabled={isUpdatePending}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-full bg-brand-500 px-4 py-2 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
             >
               {isUpdatePending ? 'Saving...' : 'Save Changes'}
             </button>
@@ -267,18 +267,18 @@ export default function TreeSettingsPage() {
       </div>
 
       {/* Danger Zone */}
-      <div className="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border border-red-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-red-700">Danger Zone</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <p className="mt-1 text-sm text-stone-600">
           Irreversible and destructive actions.
         </p>
 
-        <div className="mt-6 flex items-center justify-between rounded-md border border-red-200 bg-red-50 p-4">
+        <div className="mt-6 flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-4">
           <div>
-            <h3 className="text-sm font-medium text-gray-900">
+            <h3 className="text-sm font-medium text-stone-900">
               Delete this family tree
             </h3>
-            <p className="mt-1 text-xs text-gray-600">
+            <p className="mt-1 text-xs text-stone-600">
               The tree will be soft-deleted and can be restored within 30 days.
               After that, it will be permanently removed.
             </p>
@@ -286,7 +286,7 @@ export default function TreeSettingsPage() {
           <button
             type="button"
             onClick={() => setShowDeleteDialog(true)}
-            className="ml-4 shrink-0 rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            className="ml-4 shrink-0 rounded-xl border border-red-300 bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
           >
             Delete Tree
           </button>

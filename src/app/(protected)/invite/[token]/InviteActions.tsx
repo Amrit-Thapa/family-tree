@@ -60,7 +60,7 @@ export default function InviteActions({ token, treeName }: InviteActionsProps) {
         <div
           role="alert"
           aria-live="polite"
-          className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700"
+          className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700"
         >
           {error}
         </div>
@@ -71,7 +71,7 @@ export default function InviteActions({ token, treeName }: InviteActionsProps) {
           type="button"
           onClick={handleAccept}
           disabled={isAccepting}
-          className="w-full rounded-md bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-full bg-brand-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 shadow-[0_3px_0_0_var(--color-brand-700)] disabled:shadow-none"
         >
           {isAccepting ? 'Joining...' : `Join "${treeName}"`}
         </button>
@@ -80,7 +80,7 @@ export default function InviteActions({ token, treeName }: InviteActionsProps) {
           type="button"
           onClick={handleDecline}
           disabled={isAccepting}
-          className="w-full rounded-md border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-60"
+          className="w-full rounded-full border border-stone-300 bg-white px-4 py-2.5 text-sm font-bold text-stone-700 shadow-sm hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-60"
         >
           Decline
         </button>
